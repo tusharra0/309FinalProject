@@ -7,7 +7,7 @@
  * node prisma/createsu.js <utorid> <email> <password>
  */
 
-const { PrismaClient } = require('@prisma/client'); /// lets me tak to my sqlite database 
+const { PrismaClient } = require('@prisma/client'); // lets me talk to my PostgreSQL database 
 const bcrypt = require('bcrypt'); // library for hasing passwords, always store hash in your db and never the real password
 
 const prisma = new PrismaClient(); // creates a new prsiam client instance so you can use it for queries, opening a connection to your database
