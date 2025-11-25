@@ -2,6 +2,9 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
+const { sendWelcomeEmail } = require('../services/emailService');
+const { verifyGoogleIdToken } = require('../services/googleAuthService');
+const { signAppJwt } = require('../utils/jwt');
 
 const prisma = new PrismaClient();
 const RESET_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -21,6 +24,114 @@ const isValidPassword = (value) => {
   const hasNumber = /\d/.test(value);
   const hasSymbol = /[!@#$%^&*]/.test(value);
   return hasLower && hasUpper && hasNumber && hasSymbol;
+};
+
+const isValidEmail = (value) => {
+  if (typeof value !== 'string') return false;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(value) && value.toLowerCase().endsWith('@mail.utoronto.ca');
+};
+
+const deriveUtoridFromEmail = (email) => {
+  const [localPart = ''] = email.split('@');
+  const sanitized = localPart.toLowerCase().replace(/[^a-z0-9]/g, '');
+  let candidate = sanitized.slice(0, 8);
+  if (candidate.length < 7) {
+    candidate = candidate.padEnd(7, '0');
+  }
+  return candidate;
+};
+
+const findAvailableUtorid = async (baseUtorid) => {
+  let candidate = baseUtorid;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    if (isValidUtorid(candidate)) {
+      const existing = await prisma.user.findUnique({ where: { utorid: candidate } });
+      if (!existing) return candidate;
+    }
+    const suffix = Math.random().toString(36).replace(/[^a-z0-9]/g, '').slice(0, 2);
+    candidate = `${baseUtorid}${suffix}`.slice(0, 8);
+    if (candidate.length < 7) {
+      candidate = candidate.padEnd(7, '0');
+    }
+  }
+  return candidate;
+};
+
+exports.signUp = async (req, res) => {
+  const body = req.body || {};
+  const unknownFields = getUnknownFields(body, ['utorid', 'email', 'password', 'confirmPassword', 'name']);
+
+  if (unknownFields.length > 0) {
+    return res.status(400).json({ message: formatUnknownFieldMessage(unknownFields) });
+  }
+
+  const utorid = body.utorid ? String(body.utorid).toLowerCase() : '';
+  const email = body.email ? String(body.email).toLowerCase() : '';
+  const password = body.password;
+  const confirmPassword = body.confirmPassword;
+  const displayName = body.name ? String(body.name).trim() : utorid;
+
+  if (!utorid) {
+    return res.status(400).json({ message: 'Utorid is required' });
+  }
+
+  if (!isValidUtorid(utorid)) {
+    return res.status(400).json({ message: 'Invalid utorid.' });
+  }
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
+  if (!isValidEmail(email)) {
+    return res.status(400).json({ message: 'Invalid email.' });
+  }
+
+  if (!password) {
+    return res.status(400).json({ message: 'Password is required.' });
+  }
+
+  if (!isValidPassword(password)) {
+    return res.status(400).json({ message: 'Invalid password.' });
+  }
+
+  if (confirmPassword !== undefined && confirmPassword !== password) {
+    return res.status(400).json({ message: 'Passwords do not match.' });
+  }
+
+  try {
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ utorid }, { email }]
+      }
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ message: 'A user with that utorid or email already exists' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        utorid,
+        email,
+        password: hashedPassword,
+        name: displayName || utorid,
+        role: 'regular',
+        verified: true
+      }
+    });
+
+    await sendWelcomeEmail(user.email);
+
+    const { token, expiresAt } = signAppJwt({ id: user.id, role: user.role });
+    return res.status(201).json({ token, expiresAt });
+  } catch (err) {
+    console.error('Signup failed:', err);
+    return res.status(500).json({ message: 'Failed to create user' });
+  }
 };
 
 exports.login = async (req, res) => {
@@ -196,5 +307,62 @@ exports.resetPasswordWithToken = async (req, res) => {
   } catch (err) {
     console.error('Failed to reset password:', err);
     return res.status(500).json({ message: 'Failed to reset password' });
+  }
+};
+
+exports.googleLogin = async (req, res) => {
+  const body = req.body || {};
+  const unknownFields = getUnknownFields(body, ['googleIdToken']);
+
+  if (unknownFields.length > 0) {
+    return res.status(400).json({ message: formatUnknownFieldMessage(unknownFields) });
+  }
+
+  const googleIdToken = body.googleIdToken;
+  if (!googleIdToken) {
+    return res.status(400).json({ message: 'googleIdToken is required' });
+  }
+
+  try {
+    const profile = await verifyGoogleIdToken(googleIdToken);
+
+    if (!profile?.email || !isValidEmail(profile.email)) {
+      return res.status(400).json({ message: 'Invalid Google account email' });
+    }
+
+    const normalizedEmail = profile.email.toLowerCase();
+    const derivedUtorid = await findAvailableUtorid(deriveUtoridFromEmail(normalizedEmail));
+    const name = profile.name?.trim() || derivedUtorid;
+
+    let user = await prisma.user.findUnique({
+      where: { email: normalizedEmail }
+    });
+
+    const isNewUser = !user;
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: {
+          utorid: derivedUtorid,
+          email: normalizedEmail,
+          name,
+          role: 'regular',
+          verified: true
+        }
+      });
+    }
+
+    if (isNewUser) {
+      await sendWelcomeEmail(user.email);
+    }
+
+    const { token, expiresAt } = signAppJwt({ id: user.id, role: user.role });
+    return res.status(200).json({ token, expiresAt });
+  } catch (err) {
+    if (err.status) {
+      return res.status(err.status).json({ message: err.message });
+    }
+    console.error('Google login error:', err);
+    return res.status(500).json({ message: 'Google login failed' });
   }
 };
