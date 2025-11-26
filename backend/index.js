@@ -19,8 +19,15 @@ const port = (() => {
 })();
 
 const express = require("express");
+const cors = require("cors");
 const app = express();
 require('dotenv').config();
+
+// Configure CORS to allow requests from frontend
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+    credentials: true
+}));
 
 app.use(express.json());
 
@@ -45,7 +52,7 @@ app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/transactions', transactionsRoutes);
 app.use('/events', eventsRoutes);
-app.use('/promotions', promotionsRoutes); 
+app.use('/promotions', promotionsRoutes);
 
 
 const server = app.listen(port, () => {
