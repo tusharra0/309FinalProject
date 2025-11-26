@@ -11,6 +11,18 @@ const initialState = {
   password: ''
 };
 
+// Helper to create a dummy JWT for dev/testing
+const createMockJwt = (role, userId = '123') => {
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = btoa(JSON.stringify({
+    role,
+    userId,
+    exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour expiry
+  }));
+  const signature = 'dummy_signature';
+  return `${header}.${payload}.${signature}`;
+};
+
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -64,8 +76,15 @@ const Login = () => {
     }
   };
 
+  const handleMockLogin = (role) => {
+    const token = createMockJwt(role);
+    login(token);
+    const target = redirectPathForRole(role);
+    navigate(target, { replace: true });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full bg-white shadow-xl rounded-2xl p-8 border border-slate-100">
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome back</h1>
         <p className="text-slate-500 mb-6">Login to continue earning loyalty rewards.</p>
@@ -122,12 +141,34 @@ const Login = () => {
           <p className="text-center text-sm text-slate-500 mb-2">Processing Google login…</p>
         )}
 
-        <p className="text-sm text-slate-600 text-center">
+        <p className="text-sm text-slate-600 text-center mb-8">
           No account yet?{' '}
           <Link to="/signup" className="text-blue-600 hover:underline font-medium">
             Sign up
           </Link>
         </p>
+
+        {/* Dev Login Section */}
+        <div className="pt-6 border-t border-slate-100">
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 text-center">Dev / Mock Login</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => handleMockLogin('user')} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded transition-colors">
+              User
+            </button>
+            <button onClick={() => handleMockLogin('cashier')} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded transition-colors">
+              Cashier
+            </button>
+            <button onClick={() => handleMockLogin('manager')} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded transition-colors">
+              Manager
+            </button>
+            <button onClick={() => handleMockLogin('organizer')} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded transition-colors">
+              Organizer
+            </button>
+            <button onClick={() => handleMockLogin('superuser')} className="col-span-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded transition-colors">
+              Superuser
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
