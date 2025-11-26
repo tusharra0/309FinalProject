@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleAuthButton from '../components/GoogleAuthButton';
 import { loginWithGoogle, signUp } from '../api/auth';
