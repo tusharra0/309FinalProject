@@ -3,6 +3,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import PasswordReset from './pages/PasswordReset';
+import Profile from './pages/Profile';
 import ProtectedRoute from './routes/ProtectedRoute';
 import RoleRedirect from './routes/RoleRedirect';
 import AppLayout from './layouts/AppLayout';
@@ -50,10 +52,12 @@ const App = () => (
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/password-reset" element={<PasswordReset />} />
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/dashboard" element={<RoleRedirect />} />
+        <Route path="/profile" element={<Profile />} />
 
         {/* User Routes */}
         <Route path="/user">

@@ -32,7 +32,9 @@ const AppLayout = () => {
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
     const getNavLinks = () => {
-        switch (role) {
+        const normalizedRole = (role || '').toLowerCase();
+        switch (normalizedRole) {
+            case 'regular':
             case 'user':
                 return [
                     { to: '/user/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -119,15 +121,19 @@ const AppLayout = () => {
 
                 {/* User Profile / Logout Section */}
                 <div className="p-4 border-t border-slate-800 bg-slate-900/50">
-                    <div className="flex items-center gap-3 px-4 py-3 mb-2">
+                    <Link
+                        to="/profile"
+                        className="flex items-center gap-3 px-4 py-3 mb-2 hover:bg-slate-800 rounded-xl transition-colors"
+                        onClick={() => setIsSidebarOpen(false)}
+                    >
                         <div className="w-10 h-10 bg-slate-800 text-purple-400 rounded-full flex items-center justify-center border border-slate-700">
                             <User size={20} />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white truncate">User Account</p>
+                            <p className="text-sm font-medium text-white truncate">My Profile</p>
                             <p className="text-xs text-slate-500 truncate capitalize">{role}</p>
                         </div>
-                    </div>
+                    </Link>
                     <button
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-colors text-sm font-medium"

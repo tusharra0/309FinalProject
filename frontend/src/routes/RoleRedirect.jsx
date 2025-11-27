@@ -8,7 +8,9 @@ const RoleRedirect = () => {
 
     useEffect(() => {
         if (role) {
-            switch (role) {
+            const normalizedRole = (role || '').toLowerCase();
+            switch (normalizedRole) {
+                case 'regular':
                 case 'user':
                     navigate('/user/dashboard', { replace: true });
                     break;

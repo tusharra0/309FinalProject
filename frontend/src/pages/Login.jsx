@@ -119,6 +119,14 @@ const Login = () => {
               autoComplete="current-password"
             />
           </div>
+          <div className="flex justify-end">
+            <Link
+              to="/password-reset"
+              className="text-sm text-purple-400 hover:text-purple-300 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <button
             type="submit"
             disabled={!canSubmit || loading}

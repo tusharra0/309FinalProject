@@ -124,6 +124,9 @@ const Signup = () => {
               className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               autoComplete="new-password"
             />
+            <p className="mt-1 text-xs text-slate-500">
+              Must be 8-64 characters with uppercase, lowercase, number, and special character (!@#$%^&*)
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Confirm Password</label>

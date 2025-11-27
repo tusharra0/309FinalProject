@@ -1,5 +1,6 @@
 export const redirectPathForRole = (role) => {
   switch ((role || '').toLowerCase()) {
+    case 'regular':
     case 'user':
       return '/user/dashboard';
     case 'cashier':
