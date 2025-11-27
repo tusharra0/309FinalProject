@@ -1,7 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Gift, QrCode, Calendar } from 'lucide-react';
-import BlobBackground from '../components/BlobBackground';
-import FeatureCard from '../components/FeatureCard';
 import Navbar from '../components/Navbar';
 import '../styles/animations.css';
 
@@ -30,34 +29,42 @@ const features = [
 ];
 
 const Home = () => (
-  <div className="min-h-screen bg-white font-sans antialiased">
+  <div className="min-h-screen bg-slate-950 font-sans antialiased selection:bg-purple-500/30">
     <Navbar />
 
-    <section className="relative pt-32 pb-20 px-6 overflow-hidden">
-      <BlobBackground />
+    <section className="relative pt-40 pb-20 px-6 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-950 to-slate-950" />
 
-      <div className="relative max-w-5xl mx-auto text-center">
-        <h1 className="text-6xl md:text-7xl font-bold tracking-tight mb-6">
-          <span className="text-slate-900">Awesome Loyalty </span>
-          <span className="bg-gradient-to-r from-pink-500 via-purple-600 to-blue-500 bg-clip-text text-transparent">
-            Program for Students
+      <div className="relative max-w-5xl mx-auto text-center z-10">
+        <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8">
+          <span className="text-white">Earn Points.</span>
+          <br />
+          <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]">
+            Unlock Experiences.
           </span>
         </h1>
-        <p className="text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Earn points on purchases, enjoy VIP experiences, and redeem exclusive rewards. Simple, fast, and designed for
-          campus life.
+        <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+          The smartest way to enjoy campus life. Shop, eat, and engage to earn rewards that actually matter.
         </p>
-        <button className="px-8 py-4 bg-slate-900 text-white text-lg font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] hover:scale-105 transform duration-200">
-          Get Started
-        </button>
+        <Link to="/login">
+          <button className="px-8 py-4 bg-white text-slate-900 text-lg font-bold rounded-full hover:bg-slate-200 transition-all shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.4)] hover:scale-105 transform duration-200">
+            Get Started
+          </button>
+        </Link>
       </div>
     </section>
 
-    <section className="py-20 px-6 bg-gradient-to-b from-white to-slate-50">
+    <section className="py-20 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-3 gap-8">
           {features.map((feature) => (
-            <FeatureCard key={feature.title} {...feature} />
+            <div key={feature.title} className="bg-slate-900/50 border border-slate-800 p-8 rounded-3xl hover:bg-slate-800/50 transition-colors">
+              <div className={`w-12 h-12 rounded-2xl ${feature.gradientClasses} flex items-center justify-center mb-6`}>
+                <feature.Icon className="w-6 h-6 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+              <p className="text-slate-400 leading-relaxed">{feature.description}</p>
+            </div>
           ))}
         </div>
       </div>
