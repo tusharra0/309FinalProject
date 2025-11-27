@@ -17,6 +17,8 @@ import {
     Shield
 } from 'lucide-react';
 
+import logo from '../assets/logo.png';
+
 const AppLayout = () => {
     const { role, logout } = useAuth();
     const navigate = useNavigate();
@@ -72,86 +74,81 @@ const AppLayout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col">
-            {/* Navbar */}
-            <nav className="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-30">
-                <div className="flex items-center justify-between max-w-7xl mx-auto">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={toggleSidebar}
-                            className="p-2 hover:bg-slate-100 rounded-lg lg:hidden"
-                        >
-                            <Menu size={20} />
-                        </button>
-                        <Link to="/" className="text-xl font-bold text-slate-900 tracking-tight">
-                            Rewards App
-                        </Link>
-                        <span className="px-2 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full uppercase tracking-wider">
+        <div className="min-h-screen bg-slate-950 flex">
+            {/* Mobile Sidebar Toggle */}
+            <button
+                onClick={toggleSidebar}
+                className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-slate-900 text-white rounded-lg border border-slate-800 shadow-lg"
+            >
+                {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+
+            {/* Sidebar */}
+            <aside className={`
+                fixed inset-y-0 left-0 z-40 w-72 bg-slate-900 border-r border-slate-800 
+                transform transition-transform duration-300 ease-in-out 
+                lg:translate-x-0 lg:static flex flex-col
+                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            `}>
+                {/* Logo Section */}
+                <div className="p-8 flex flex-col items-center border-b border-slate-800">
+                    <Link to="/" className="flex flex-col items-center gap-4">
+                        <img src={logo} alt="Logo" className="h-24 w-auto object-contain drop-shadow-lg" />
+                        <span className="px-3 py-1 bg-slate-800 text-slate-300 text-xs font-bold rounded-full uppercase tracking-widest border border-slate-700">
                             {role}
                         </span>
-                    </div>
+                    </Link>
+                </div>
 
-                    <div className="flex items-center gap-4">
-                        <div className="relative group">
-                            <button className="flex items-center gap-2 p-2 hover:bg-slate-100 rounded-full transition-colors">
-                                <div className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center">
-                                    <User size={18} />
-                                </div>
-                            </button>
-
-                            {/* Dropdown */}
-                            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-100 py-1 hidden group-hover:block">
-                                <button
-                                    onClick={handleLogout}
-                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                                >
-                                    <LogOut size={16} />
-                                    Logout
-                                </button>
-                            </div>
-                        </div>
+                {/* Navigation Links */}
+                <div className="flex-1 overflow-y-auto py-6 px-4">
+                    <div className="space-y-2">
+                        {getNavLinks().map((link) => (
+                            <Link
+                                key={link.to}
+                                to={link.to}
+                                className="flex items-center gap-4 px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all duration-200 font-medium group"
+                                onClick={() => setIsSidebarOpen(false)}
+                            >
+                                <link.icon size={22} className="group-hover:scale-110 transition-transform duration-200" />
+                                <span>{link.label}</span>
+                            </Link>
+                        ))}
                     </div>
                 </div>
-            </nav>
 
-            <div className="flex flex-1 max-w-7xl mx-auto w-full">
-                {/* Sidebar */}
-                <aside className={`
-          fixed inset-y-0 left-0 z-20 w-64 bg-white border-r border-slate-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:h-auto
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}>
-                    <div className="h-full overflow-y-auto p-4">
-                        <div className="flex justify-end lg:hidden mb-4">
-                            <button onClick={toggleSidebar} className="p-2 hover:bg-slate-100 rounded-lg">
-                                <X size={20} />
-                            </button>
+                {/* User Profile / Logout Section */}
+                <div className="p-4 border-t border-slate-800 bg-slate-900/50">
+                    <div className="flex items-center gap-3 px-4 py-3 mb-2">
+                        <div className="w-10 h-10 bg-slate-800 text-purple-400 rounded-full flex items-center justify-center border border-slate-700">
+                            <User size={20} />
                         </div>
-                        <div className="space-y-1">
-                            {getNavLinks().map((link) => (
-                                <Link
-                                    key={link.to}
-                                    to={link.to}
-                                    className="flex items-center gap-3 px-4 py-3 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors font-medium"
-                                    onClick={() => setIsSidebarOpen(false)}
-                                >
-                                    <link.icon size={20} />
-                                    {link.label}
-                                </Link>
-                            ))}
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-white truncate">User Account</p>
+                            <p className="text-xs text-slate-500 truncate capitalize">{role}</p>
                         </div>
                     </div>
-                </aside>
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 hover:text-red-300 rounded-xl transition-colors text-sm font-medium"
+                    >
+                        <LogOut size={20} />
+                        Sign Out
+                    </button>
+                </div>
+            </aside>
 
-                {/* Main Content */}
-                <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
+            {/* Main Content */}
+            <main className="flex-1 min-w-0 bg-slate-950">
+                <div className="p-4 lg:p-8 pt-20 lg:pt-8 max-w-7xl mx-auto">
                     <Outlet />
-                </main>
-            </div>
+                </div>
+            </main>
 
-            {/* Overlay for mobile sidebar */}
+            {/* Mobile Overlay */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black/20 z-10 lg:hidden"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}

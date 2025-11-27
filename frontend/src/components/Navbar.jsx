@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+import logo from '../assets/logo.png';
+
 const Navbar = () => (
   <nav className="fixed top-6 left-0 right-0 z-50 max-w-2xl mx-auto">
-    <div className="bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-full px-6 py-3 shadow-2xl shadow-slate-900/20 transition-all duration-300 hover:scale-[1.02]">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-white font-bold text-lg tracking-tight pl-2">
-            Rewards
-          </span>
+    <div className="relative bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-full px-6 py-3 shadow-2xl shadow-slate-900/20 transition-all duration-300 hover:scale-[1.02]">
+      <div className="flex items-center justify-end">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2">
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="Rewards" className="h-28 w-auto object-contain drop-shadow-lg" />
+          </Link>
         </div>
 
         <div className="flex items-center gap-4">

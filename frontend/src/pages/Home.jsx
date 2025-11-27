@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Gift, QrCode, Calendar } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import '../styles/animations.css';
@@ -38,16 +39,18 @@ const Home = () => (
         <h1 className="text-6xl md:text-8xl font-bold tracking-tight mb-8">
           <span className="text-white">Earn Points.</span>
           <br />
-          <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent animate-gradient-x bg-[length:200%_auto]">
             Unlock Experiences.
           </span>
         </h1>
         <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed">
           The smartest way to enjoy campus life. Shop, eat, and engage to earn rewards that actually matter.
         </p>
-        <button className="px-8 py-4 bg-white text-slate-900 text-lg font-bold rounded-full hover:bg-slate-200 transition-all shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.4)] hover:scale-105 transform duration-200">
-          Get Started
-        </button>
+        <Link to="/login">
+          <button className="px-8 py-4 bg-white text-slate-900 text-lg font-bold rounded-full hover:bg-slate-200 transition-all shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] hover:shadow-[0_0_60px_-15px_rgba(255,255,255,0.4)] hover:scale-105 transform duration-200">
+            Get Started
+          </button>
+        </Link>
       </div>
     </section>
 

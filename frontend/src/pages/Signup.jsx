@@ -78,89 +78,89 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full bg-white shadow-xl rounded-2xl p-8 border border-slate-100">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Create account</h1>
-        <p className="text-slate-500 mb-6">Join Campus Loyalty to start earning rewards.</p>
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
+      <div className="max-w-md w-full bg-slate-900/50 shadow-xl rounded-2xl p-8 border border-slate-800">
+        <h1 className="text-3xl font-bold text-white mb-2">Create account</h1>
+        <p className="text-slate-400 mb-6">Join Campus Loyalty to start earning rewards.</p>
 
         {error ? (
-          <div className="mb-4 rounded-lg bg-red-50 border border-red-100 text-red-700 px-4 py-3 text-sm">
+          <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 text-sm">
             {error}
           </div>
         ) : null}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">UTORid</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">UTORid</label>
             <input
               type="text"
               name="utorid"
               value={form.utorid}
               onChange={handleChange}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="e.g. abc12345"
               autoComplete="username"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">Email</label>
             <input
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               placeholder="you@mail.utoronto.ca"
               autoComplete="email"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">Password</label>
             <input
               type="password"
               name="password"
               value={form.password}
               onChange={handleChange}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               autoComplete="new-password"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Confirm Password</label>
+            <label className="block text-sm font-medium text-slate-300 mb-1">Confirm Password</label>
             <input
               type="password"
               name="confirmPassword"
               value={form.confirmPassword}
               onChange={handleChange}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               autoComplete="new-password"
             />
           </div>
           <button
             type="submit"
             disabled={!canSubmit || loading}
-            className="w-full rounded-lg bg-slate-900 text-white py-3 font-semibold hover:bg-slate-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-white text-slate-900 py-3 font-bold hover:bg-slate-200 transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? 'Signing up...' : 'Sign Up'}
           </button>
         </form>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="h-px bg-slate-200 flex-1" />
-          <span className="text-xs uppercase tracking-[0.2em] text-slate-400">Or</span>
-          <div className="h-px bg-slate-200 flex-1" />
+          <div className="h-px bg-slate-800 flex-1" />
+          <span className="text-xs uppercase tracking-[0.2em] text-slate-500">Or</span>
+          <div className="h-px bg-slate-800 flex-1" />
         </div>
 
         <div className="flex justify-center mb-4">
           <GoogleAuthButton onCredential={handleGoogleCredential} />
         </div>
         {googleLoading && (
-          <p className="text-center text-sm text-slate-500 mb-2">Processing Google sign in…</p>
+          <p className="text-center text-sm text-slate-400 mb-2">Processing Google sign in…</p>
         )}
 
-        <p className="text-sm text-slate-600 text-center">
+        <p className="text-sm text-slate-400 text-center">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 hover:underline font-medium">
+          <Link to="/login" className="text-purple-400 hover:text-purple-300 hover:underline font-medium">
             Login
           </Link>
         </p>
