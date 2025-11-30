@@ -4,6 +4,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import PasswordReset from './pages/PasswordReset';
+import ResetPasswordWithToken from './pages/ResetPasswordWithToken';
+import VerifyEmail from './pages/VerifyEmail';
 import Profile from './pages/Profile';
 import ProtectedRoute from './routes/ProtectedRoute';
 import RoleRedirect from './routes/RoleRedirect';
@@ -53,6 +55,8 @@ const App = () => (
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/password-reset" element={<PasswordReset />} />
+      <Route path="/reset-password/:token" element={<ResetPasswordWithToken />} />
+      <Route path="/verify-email/:token" element={<VerifyEmail />} />
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>

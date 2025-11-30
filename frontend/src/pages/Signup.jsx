@@ -46,12 +46,14 @@ const Signup = () => {
 
     try {
       setLoading(true);
-      await signUp({
+      const result = await signUp({
         utorid: form.utorid.trim(),
         email: form.email.trim(),
         password: form.password,
         confirmPassword: form.confirmPassword
       });
+
+      alert(result.message || 'Registration successful! Please check your email to verify your account.');
       navigate('/login');
     } catch (err) {
       setError(err.message || 'Sign up failed');

@@ -30,21 +30,23 @@ enum PromotionType {
 
 model User {
   id            Int           @id @default(autoincrement())
-  utorid        String        @unique
-  email         String        @unique
-  password      String?
-  name          String
-  role          RoleType      @default(regular)
-  verified      Boolean       @default(false)
-  activated     Boolean       @default(false)
-  suspicious    Boolean       @default(false)
-  points        Int           @default(0)
-  avatarUrl     String?
-  birthday      DateTime?
-  resetToken    String?
-  expiresAt     DateTime?
-  lastLogin     DateTime?
-  createdAt     DateTime      @default(now())
+  utorid               String        @unique
+  email                String        @unique
+  password             String?
+  name                 String
+  role                 RoleType      @default(regular)
+  verified             Boolean       @default(false)
+  activated            Boolean       @default(false)
+  suspicious           Boolean       @default(false)
+  points               Int           @default(0)
+  avatarUrl            String?
+  birthday             DateTime?
+  resetToken           String?
+  resetExpiresAt       DateTime?
+  verificationToken    String?
+  verificationExpiresAt DateTime?
+  lastLogin            DateTime?
+  createdAt            DateTime      @default(now())
 
   transactionsTarget    Transaction[]        @relation("TargetUserTransactions")
   transactionsCreated   Transaction[]        @relation("CreatorTransactions")

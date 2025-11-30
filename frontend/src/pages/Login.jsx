@@ -53,7 +53,12 @@ const Login = () => {
       const target = redirectPathForRole(decoded.role);
       navigate(target, { replace: true });
     } catch (err) {
-      setError(err.message || 'Login failed');
+      console.error('Login error:', err);
+      if (err.status === 403) {
+        setError(err.message || 'Please verify your email before logging in.');
+      } else {
+        setError(err.message || 'Login failed');
+      }
     } finally {
       setLoading(false);
     }

@@ -2,12 +2,13 @@ const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
-const { sendWelcomeEmail } = require('../services/emailService');
+const { sendWelcomeEmail, sendVerificationEmail, sendPasswordResetEmail } = require('../services/emailService');
 const { verifyGoogleIdToken } = require('../services/googleAuthService');
 const { signAppJwt } = require('../utils/jwt');
 
 const prisma = new PrismaClient();
 const RESET_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const VERIFICATION_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 const getUnknownFields = (payload, allowedFields) =>
   Object.keys(payload).filter((field) => !allowedFields.includes(field));
@@ -112,6 +113,8 @@ exports.signUp = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const verificationToken = uuidv4();
+    const verificationExpiresAt = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS);
 
     const user = await prisma.user.create({
       data: {
@@ -120,14 +123,17 @@ exports.signUp = async (req, res) => {
         password: hashedPassword,
         name: displayName || utorid,
         role: 'regular',
-        verified: true
+        verified: false,
+        verificationToken,
+        verificationExpiresAt
       }
     });
 
-    await sendWelcomeEmail(user.email);
+    await sendVerificationEmail(user.email, verificationToken, user.name);
 
-    const { token, expiresAt } = signAppJwt({ id: user.id, role: user.role });
-    return res.status(201).json({ token, expiresAt });
+    return res.status(201).json({
+      message: 'Registration successful! Please check your email to verify your account.'
+    });
   } catch (err) {
     console.error('Signup failed:', err);
     return res.status(500).json({ message: 'Failed to create user' });
@@ -169,6 +175,12 @@ exports.login = async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Incorrect password' });
+    }
+
+    if (!user.verified) {
+      return res.status(403).json({
+        message: 'Please verify your email before logging in. Check your inbox for the verification link.'
+      });
     }
 
     const loginTimestamp = new Date();
@@ -227,19 +239,20 @@ exports.requestPasswordReset = async (req, res) => {
     }
 
     const resetToken = uuidv4();
-    const expiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+    const resetExpiresAt = new Date(Date.now() + RESET_TOKEN_TTL_MS);
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
         resetToken,
-        expiresAt
+        resetExpiresAt
       }
     });
 
+    await sendPasswordResetEmail(user.email, resetToken, user.name);
+
     return res.status(202).json({
-      resetToken,
-      expiresAt: expiresAt.toISOString()
+      message: 'If a user with that utorid exists, a password reset email has been sent.'
     });
   } catch (err) {
     console.error('Failed to issue reset token:', err);
@@ -284,7 +297,7 @@ exports.resetPasswordWithToken = async (req, res) => {
       return res.status(404).json({ message: 'Token not found' });
     }
 
-    if (!user.expiresAt || user.expiresAt < new Date()) {
+    if (!user.resetExpiresAt || user.resetExpiresAt < new Date()) {
       return res.status(410).json({ message: 'Token expired' });
     }
 
@@ -299,7 +312,7 @@ exports.resetPasswordWithToken = async (req, res) => {
       data: {
         password: hashedPassword,
         resetToken: null,
-        expiresAt: null
+        resetExpiresAt: null
       }
     });
 
@@ -307,6 +320,48 @@ exports.resetPasswordWithToken = async (req, res) => {
   } catch (err) {
     console.error('Failed to reset password:', err);
     return res.status(500).json({ message: 'Failed to reset password' });
+  }
+};
+
+exports.verifyEmail = async (req, res) => {
+  const { verificationToken } = req.params;
+
+  if (!verificationToken) {
+    return res.status(400).json({ message: 'Verification token is required' });
+  }
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: { verificationToken }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Invalid verification token' });
+    }
+
+    if (!user.verificationExpiresAt || user.verificationExpiresAt < new Date()) {
+      return res.status(410).json({ message: 'Verification token has expired' });
+    }
+
+    if (user.verified) {
+      return res.status(200).json({ message: 'Email already verified' });
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        verified: true,
+        verificationToken: null,
+        verificationExpiresAt: null
+      }
+    });
+
+    await sendWelcomeEmail(user.email);
+
+    return res.status(200).json({ message: 'Email verified successfully! You can now log in.' });
+  } catch (err) {
+    console.error('Failed to verify email:', err);
+    return res.status(500).json({ message: 'Failed to verify email' });
   }
 };
 

@@ -5,7 +5,8 @@ const {
   requestPasswordReset,
   resetPasswordWithToken,
   signUp,
-  googleLogin
+  googleLogin,
+  verifyEmail
 } = require('../controllers/authController');
 
 // POST /auth/tokens 
@@ -27,5 +28,9 @@ router.post('/resets', requestPasswordReset);
 // POST /auth/resets/:resetToken 
 // Complete password reset
 router.post('/resets/:resetToken', resetPasswordWithToken);
+
+// POST /auth/verify-email/:verificationToken
+// Verify email address
+router.post('/verify-email/:verificationToken', verifyEmail);
 
 module.exports = router;
