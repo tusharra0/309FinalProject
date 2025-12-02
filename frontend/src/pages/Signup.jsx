@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from 'react';
-import { jwtDecode } from 'jwt-decode';
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleAuthButton from '../components/GoogleAuthButton';
 import { loginWithGoogle, signUp } from '../api/auth';
-import { useAuth } from '../context/AuthContext';
+import useUserStore from '../store/userStore';
 import { redirectPathForRole } from '../utils/auth';
+import ErrorMessage from '../components/ErrorMessage';
+import SuccessMessage from '../components/SuccessMessage';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const initialState = {
   utorid: '',
@@ -15,9 +17,10 @@ const initialState = {
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { setUser } = useUserStore();
   const [form, setForm] = useState(initialState);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -38,6 +41,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match.');
@@ -53,8 +57,8 @@ const Signup = () => {
         confirmPassword: form.confirmPassword
       });
 
-      alert(result.message || 'Registration successful! Please check your email to verify your account.');
-      navigate('/login');
+      setSuccess(result.message || 'Registration successful! Please check your email to verify your account.');
+      setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
       setError(err.message || 'Sign up failed');
     } finally {
@@ -68,9 +72,8 @@ const Signup = () => {
     setGoogleLoading(true);
     try {
       const result = await loginWithGoogle(credential);
-      login(result.token);
-      const decoded = jwtDecode(result.token);
-      const target = redirectPathForRole(decoded.role);
+      setUser(result.user, result.token);
+      const target = redirectPathForRole(result.user.role);
       navigate(target, { replace: true });
     } catch (err) {
       setError(err.message || 'Google sign up failed');
@@ -85,11 +88,8 @@ const Signup = () => {
         <h1 className="text-3xl font-bold text-white mb-2">Create account</h1>
         <p className="text-slate-400 mb-6">Join Campus Loyalty to start earning rewards.</p>
 
-        {error ? (
-          <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 text-sm">
-            {error}
-          </div>
-        ) : null}
+        <ErrorMessage message={error} onClose={() => setError('')} className="mb-4" />
+        <SuccessMessage message={success} className="mb-4" />
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
@@ -144,8 +144,9 @@ const Signup = () => {
           <button
             type="submit"
             disabled={!canSubmit || loading}
-            className="w-full rounded-lg bg-white text-slate-900 py-3 font-bold hover:bg-slate-200 transition disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-white text-slate-900 py-3 font-bold hover:bg-slate-200 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
+            {loading && <LoadingSpinner size="sm" />}
             {loading ? 'Signing up...' : 'Sign Up'}
           </button>
         </form>

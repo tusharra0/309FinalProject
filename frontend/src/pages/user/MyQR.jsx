@@ -1,19 +1,61 @@
 import React from 'react';
+import QRCodeComponent from 'qrcode.react';
+import { Download } from 'lucide-react';
+import useUserStore from '../../store/userStore';
 
 const MyQR = () => {
-    return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold text-white">My QR Code</h1>
-                <p className="text-slate-400">Scan this code to earn points.</p>
-            </div>
+    const { user } = useUserStore();
 
-            <div className="flex justify-center py-12">
-                <div className="bg-slate-900 p-8 rounded-xl shadow-sm border border-slate-800 text-center">
-                    <div className="w-64 h-64 bg-white rounded-lg mx-auto mb-4 flex items-center justify-center text-slate-900 font-bold">
-                        QR Code Placeholder
+    const downloadQR = () => {
+        const canvas = document.getElementById('user-qr-code');
+        if (canvas) {
+            const url = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `${user?.utorid || 'user'}-qr-code.png`;
+            link.href = url;
+            link.click();
+        }
+    };
+
+    const qrData = JSON.stringify({
+        userId: user?.id,
+        utorid: user?.utorid
+    });
+
+    return (
+        <div className="max-w-2xl mx-auto">
+            <h1 className="text-3xl font-bold text-white mb-2">My QR Code</h1>
+            <p className="text-slate-400 mb-8">Share this QR code for point transactions</p>
+
+            <div className="bg-slate-900 rounded-2xl shadow-sm border border-slate-800 p-8">
+                <div className="flex flex-col items-center">
+                    <div className="bg-white p-6 rounded-2xl shadow-lg mb-6">
+                        <QRCodeComponent
+                            id="user-qr-code"
+                            value={qrData}
+                            size={256}
+                            level="H"
+                            includeMargin
+                        />
                     </div>
-                    <p className="text-sm text-slate-400">Member ID: 1234-5678</p>
+
+                    <div className="text-center mb-6">
+                        <p className="text-white font-semibold text-lg mb-1">{user?.firstName} {user?.lastName}</p>
+                        <p className="text-slate-400 text-sm">UTORid: {user?.utorid}</p>
+                        <p className="text-slate-500 text-xs mt-2">User ID: {user?.id}</p>
+                    </div>
+
+                    <button
+                        onClick={downloadQR}
+                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                    >
+                        <Download size={18} />
+                        Download QR Code
+                    </button>
+
+                    <p className="text-slate-500 text-sm mt-6 max-w-md text-center">
+                        Show this QR code at participating locations to receive or transfer points.
+                    </p>
                 </div>
             </div>
         </div>

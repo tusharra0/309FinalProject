@@ -1,18 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, ChevronDown, LayoutDashboard, LogOut } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import useUserStore from '../store/userStore';
 import { redirectPathForRole } from '../utils/auth';
 
 import logo from '../assets/logo.png';
 
 const Navbar = () => {
-  const { token, role, logout } = useAuth();
+  const { user, isAuthenticated, logout, getRole } = useUserStore();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  const isAuthenticated = !!token;
+  const role = getRole();
 
   useEffect(() => {
     const handleClickOutside = (event) => {

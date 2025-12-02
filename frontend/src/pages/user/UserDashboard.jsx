@@ -1,15 +1,48 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { QrCode, CreditCard, Plus, Minus } from 'lucide-react';
+import QRCodeComponent from 'qrcode.react';
+import useUserStore from '../../store/userStore';
+import { getMyTransactions } from '../../api/transactions';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorMessage from '../../components/ErrorMessage';
 
 const UserDashboard = () => {
-    // Mock data - in a real app this would come from props or context
-    const balance = 1250;
-    const recentActivity = [
-        { id: 1, type: 'Purchase', date: '2025-10-24', amount: 50, isPositive: true },
-        { id: 2, type: 'Redemption', date: '2025-10-25', amount: 500, isPositive: false },
-        { id: 3, type: 'Event', date: '2025-10-26', amount: 100, isPositive: true },
-    ];
+    const { user, getPoints } = useUserStore();
+    const [recentActivity, setRecentActivity] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const balance = getPoints();
+
+    useEffect(() => {
+        const fetchRecentTransactions = async () => {
+            try {
+                setLoading(true);
+                const data = await getMyTransactions({
+                    limit: 5,
+                    orderBy: 'createdAt',
+                    order: 'desc'
+                });
+                setRecentActivity(data.transactions || []);
+            } catch (err) {
+                console.error('Failed to fetch transactions:', err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRecentTransactions();
+    }, []);
+
+    const formatTransactionType = (type) => {
+        return type.charAt(0).toUpperCase() + type.slice(1);
+    };
+
+    const isPositiveTransaction = (transaction) => {
+        return transaction.pointChange > 0;
+    };
 
     return (
         <div className="flex flex-col h-[calc(100vh-8rem)] gap-6">
@@ -23,7 +56,7 @@ const UserDashboard = () => {
                     <div className="flex justify-between items-start mb-1">
                         <h2 className="text-slate-400 text-xs font-semibold tracking-wider uppercase">Current Balance</h2>
                         <span className="px-2 py-0.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-[10px] font-medium text-white">
-                            GOLD MEMBER
+                            {user?.verified ? 'VERIFIED' : 'UNVERIFIED'}
                         </span>
                     </div>
 
@@ -55,13 +88,21 @@ const UserDashboard = () => {
                     <h3 className="text-base font-semibold text-white mb-4">Your Digital ID</h3>
 
                     <div className="bg-white p-3 rounded-xl mb-4 shadow-inner">
-                        {/* Placeholder for actual QR Code */}
-                        <div className="w-40 h-40 bg-slate-100 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-300">
-                            <QrCode size={56} className="text-slate-900" />
-                        </div>
+                        {user?.id ? (
+                            <QRCodeComponent
+                                value={JSON.stringify({ userId: user.id, utorid: user.utorid })}
+                                size={160}
+                                level="H"
+                            />
+                        ) : (
+                            <div className="w-40 h-40 bg-slate-100 rounded-lg flex items-center justify-center border-2 border-dashed border-slate-300">
+                                <QrCode size={56} className="text-slate-900" />
+                            </div>
+                        )}
                     </div>
 
-                    <p className="text-slate-400 text-xs">Scan at checkout to earn points</p>
+                    <p className="text-slate-400 text-xs mb-1">Scan at checkout to earn points</p>
+                    <p className="text-slate-500 text-xs">ID: {user?.utorid || 'N/A'}</p>
                 </div>
 
                 {/* Recent Activity Card */}
@@ -73,28 +114,42 @@ const UserDashboard = () => {
                         </Link>
                     </div>
 
-                    <div className="space-y-4 overflow-y-auto flex-1 pr-2 custom-scrollbar">
-                        {recentActivity.map((activity) => (
-                            <div key={activity.id} className="flex items-center justify-between group">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activity.isPositive
-                                            ? 'bg-emerald-500/10 text-emerald-400'
-                                            : 'bg-orange-500/10 text-orange-400'
+                    {loading ? (
+                        <div className="flex-1 flex items-center justify-center">
+                            <LoadingSpinner />
+                        </div>
+                    ) : error ? (
+                        <ErrorMessage message={error} />
+                    ) : recentActivity.length === 0 ? (
+                        <div className="flex-1 flex items-center justify-center">
+                            <p className="text-slate-500 text-sm">No recent activity</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4 overflow-y-auto flex-1 pr-2 custom-scrollbar">
+                            {recentActivity.map((transaction) => (
+                                <div key={transaction.id} className="flex items-center justify-between group">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPositiveTransaction(transaction)
+                                                ? 'bg-emerald-500/10 text-emerald-400'
+                                                : 'bg-orange-500/10 text-orange-400'
+                                            }`}>
+                                            {isPositiveTransaction(transaction) ? <Plus size={14} /> : <Minus size={14} />}
+                                        </div>
+                                        <div>
+                                            <p className="text-white text-sm font-medium">{formatTransactionType(transaction.type)}</p>
+                                            <p className="text-slate-500 text-[10px]">
+                                                {new Date(transaction.createdAt).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span className={`text-sm font-bold ${isPositiveTransaction(transaction) ? 'text-emerald-400' : 'text-slate-300'
                                         }`}>
-                                        {activity.isPositive ? <Plus size={14} /> : <Minus size={14} />}
-                                    </div>
-                                    <div>
-                                        <p className="text-white text-sm font-medium">{activity.type}</p>
-                                        <p className="text-slate-500 text-[10px]">{activity.date}</p>
-                                    </div>
+                                        {isPositiveTransaction(transaction) ? '+' : ''}{transaction.pointChange}
+                                    </span>
                                 </div>
-                                <span className={`text-sm font-bold ${activity.isPositive ? 'text-emerald-400' : 'text-slate-300'
-                                    }`}>
-                                    {activity.isPositive ? '+' : '-'}{activity.amount}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -3,8 +3,10 @@ import { jwtDecode } from 'jwt-decode';
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleAuthButton from '../components/GoogleAuthButton';
 import { loginWithGoogle, loginWithPassword } from '../api/auth';
-import { useAuth } from '../context/AuthContext';
+import useUserStore from '../store/userStore';
 import { redirectPathForRole } from '../utils/auth';
+import ErrorMessage from '../components/ErrorMessage';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const initialState = {
   utorid: '',
@@ -25,7 +27,7 @@ const createMockJwt = (role, userId = '123') => {
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { setUser } = useUserStore();
   const [form, setForm] = useState(initialState);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -48,9 +50,12 @@ const Login = () => {
         utorid: form.utorid.trim(),
         password: form.password
       });
-      login(result.token);
-      const decoded = jwtDecode(result.token);
-      const target = redirectPathForRole(decoded.role);
+
+      // Store user and token in Zustand store
+      setUser(result.user, result.token);
+
+      // Redirect based on role
+      const target = redirectPathForRole(result.user.role);
       navigate(target, { replace: true });
     } catch (err) {
       console.error('Login error:', err);
@@ -70,9 +75,12 @@ const Login = () => {
     setGoogleLoading(true);
     try {
       const result = await loginWithGoogle(credential);
-      login(result.token);
-      const decoded = jwtDecode(result.token);
-      const target = redirectPathForRole(decoded.role);
+
+      // Store user and token in Zustand store
+      setUser(result.user, result.token);
+
+      // Redirect based on role
+      const target = redirectPathForRole(result.user.role);
       navigate(target, { replace: true });
     } catch (err) {
       setError(err.message || 'Google login failed');
@@ -83,7 +91,21 @@ const Login = () => {
 
   const handleMockLogin = (role) => {
     const token = createMockJwt(role);
-    login(token);
+    const decoded = jwtDecode(token);
+
+    // Create mock user object
+    const mockUser = {
+      id: parseInt(decoded.userId),
+      utorid: `mock_${role}`,
+      role: decoded.role,
+      email: `${role}@example.com`,
+      firstName: 'Mock',
+      lastName: role.charAt(0).toUpperCase() + role.slice(1),
+      points: 1000,
+      verified: true
+    };
+
+    setUser(mockUser, token);
     const target = redirectPathForRole(role);
     navigate(target, { replace: true });
   };
@@ -94,11 +116,7 @@ const Login = () => {
         <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>
         <p className="text-slate-400 mb-6">Login to continue earning loyalty rewards.</p>
 
-        {error ? (
-          <div className="mb-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 text-sm">
-            {error}
-          </div>
-        ) : null}
+        <ErrorMessage message={error} onClose={() => setError('')} className="mb-4" />
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
@@ -135,8 +153,9 @@ const Login = () => {
           <button
             type="submit"
             disabled={!canSubmit || loading}
-            className="w-full rounded-lg bg-white text-slate-900 py-3 font-bold hover:bg-slate-200 transition disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-white text-slate-900 py-3 font-bold hover:bg-slate-200 transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
+            {loading && <LoadingSpinner size="sm" />}
             {loading ? 'Signing in...' : 'Login'}
           </button>
         </form>
@@ -151,7 +170,10 @@ const Login = () => {
           <GoogleAuthButton onCredential={handleGoogleCredential} />
         </div>
         {googleLoading && (
-          <p className="text-center text-sm text-slate-400 mb-2">Processing Google login…</p>
+          <div className="flex justify-center mb-2">
+            <LoadingSpinner size="sm" />
+            <p className="text-sm text-slate-400 ml-2">Processing Google login…</p>
+          </div>
         )}
 
         <p className="text-sm text-slate-400 text-center mb-8">
@@ -165,7 +187,7 @@ const Login = () => {
         <div className="pt-6 border-t border-slate-800">
           <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 text-center">Dev / Mock Login</p>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => handleMockLogin('user')} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded transition-colors">
+            <button onClick={() => handleMockLogin('regular')} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded transition-colors">
               User
             </button>
             <button onClick={() => handleMockLogin('cashier')} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded transition-colors">
