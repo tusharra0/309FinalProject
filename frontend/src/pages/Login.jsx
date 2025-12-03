@@ -3,6 +3,7 @@ import { jwtDecode } from 'jwt-decode';
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleAuthButton from '../components/GoogleAuthButton';
 import { loginWithGoogle, loginWithPassword } from '../api/auth';
+import { setAuthToken as apiSetAuthToken } from '../api/api';
 import useUserStore from '../store/userStore';
 import { redirectPathForRole } from '../utils/auth';
 import ErrorMessage from '../components/ErrorMessage';
@@ -53,6 +54,10 @@ const Login = () => {
         password: form.password
       });
 
+      // Ensure API helper has the token immediately so subsequent requests
+      // include Authorization header (AuthContext updates localStorage via
+      // useEffect which may run after this function returns).
+      apiSetAuthToken(result.token);
       // Set token in auth context
       authLogin(result.token);
 
@@ -83,6 +88,7 @@ const Login = () => {
       const result = await loginWithGoogle(credential);
 
       // Set token in auth context
+      apiSetAuthToken(result.token);
       authLogin(result.token);
 
       // Fetch and set user data

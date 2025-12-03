@@ -23,15 +23,6 @@ const cors = require("cors");
 const app = express();
 require('dotenv').config();
 
-// Global error handlers
-process.on('uncaughtException', (err) => {
-    console.error('Uncaught Exception:', err);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection:', reason);
-});
-
 // Configure CORS to allow requests from frontend
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3001',
@@ -50,30 +41,22 @@ if (!JWT_SECRET) {
 }
 
 // ADD YOUR WORK HERE
-try {
-    const authRoutes = require('./src/routes/authRoutes');
-    const userRoutes = require('./src/routes/userRoutes');
-    const transactionsRoutes = require('./src/routes/transactionsRoutes');
-    const eventsRoutes = require('./src/routes/eventsRoutes');
-    const promotionsRoutes = require('./src/routes/promotionsRoutes');
+const authRoutes = require('./src/routes/authRoutes');
+const userRoutes = require('./src/routes/userRoutes');
+const transactionsRoutes = require('./src/routes/transactionsRoutes');
+const eventsRoutes = require('./src/routes/eventsRoutes');
+const promotionsRoutes = require('./src/routes/promotionsRoutes');
 
-    app.use('/auth', authRoutes);
-    app.use('/users', userRoutes);
-    app.use('/transactions', transactionsRoutes);
-    app.use('/events', eventsRoutes);
-    app.use('/promotions', promotionsRoutes);
 
-    // Health check endpoint
-    app.get('/health', (req, res) => {
-        res.json({ status: 'ok' });
-    });
 
-} catch (err) {
-    console.error('Failed to load routes:', err);
-    process.exit(1);
-}
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/transactions', transactionsRoutes);
+app.use('/events', eventsRoutes);
+app.use('/promotions', promotionsRoutes);
 
-const server = app.listen(port, '0.0.0.0', () => {
+
+const server = app.listen(port, () => {
     console.log(`Server running on port ${port}`);
 });
 

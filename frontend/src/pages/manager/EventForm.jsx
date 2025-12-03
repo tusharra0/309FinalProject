@@ -15,9 +15,10 @@ const EventForm = () => {
         name: '',
         description: '',
         location: '',
-        eventDate: '',
-        maxGuests: '',
-        pointsReward: '',
+        startTime: '',
+        endTime: '',
+        capacity: '',
+        points: '',
         published: false
     });
 
@@ -42,9 +43,10 @@ const EventForm = () => {
                 name: data.name,
                 description: data.description,
                 location: data.location,
-                eventDate: new Date(data.eventDate).toISOString().slice(0, 16),
-                maxGuests: data.maxGuests,
-                pointsReward: data.pointsReward,
+                startTime: new Date(data.startTime).toISOString().slice(0, 16),
+                endTime: new Date(data.endTime).toISOString().slice(0, 16),
+                capacity: data.capacity || '',
+                points: data.pointsTotal || '',
                 published: data.published
             });
             setOrganizers(data.organizers || []);
@@ -60,13 +62,30 @@ const EventForm = () => {
         setError('');
         setSuccess('');
 
+        if (!form.startTime || !form.endTime) {
+            setError('Start time and end time are required');
+            return;
+        }
+
+        const startTime = new Date(form.startTime);
+        const endTime = new Date(form.endTime);
+
+        if (startTime >= endTime) {
+            setError('End time must be after start time');
+            return;
+        }
+
         try {
             setSaving(true);
             const data = {
-                ...form,
-                maxGuests: parseInt(form.maxGuests),
-                pointsReward: parseInt(form.pointsReward),
-                eventDate: new Date(form.eventDate).toISOString()
+                name: form.name,
+                description: form.description,
+                location: form.location,
+                startTime: startTime.toISOString(),
+                endTime: endTime.toISOString(),
+                capacity: form.capacity ? parseInt(form.capacity) : null,
+                points: form.points ? parseInt(form.points) : null,
+                published: form.published
             };
 
             if (isEdit) {
@@ -199,27 +218,40 @@ const EventForm = () => {
 
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                                    Date & Time *
+                                    Start Time *
                                 </label>
                                 <input
                                     type="datetime-local"
-                                    value={form.eventDate}
-                                    onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
+                                    value={form.startTime}
+                                    onChange={(e) => setForm({ ...form, startTime: e.target.value })}
                                     className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     required
                                 />
                             </div>
                         </div>
 
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                End Time *
+                            </label>
+                            <input
+                                type="datetime-local"
+                                value={form.endTime}
+                                onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+                                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                required
+                            />
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                                    Max Guests *
+                                    Capacity *
                                 </label>
                                 <input
                                     type="number"
-                                    value={form.maxGuests}
-                                    onChange={(e) => setForm({ ...form, maxGuests: e.target.value })}
+                                    value={form.capacity}
+                                    onChange={(e) => setForm({ ...form, capacity: e.target.value })}
                                     className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     placeholder="e.g., 50"
                                     min="1"
@@ -229,12 +261,12 @@ const EventForm = () => {
 
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-2">
-                                    Points Reward *
+                                    Points *
                                 </label>
                                 <input
                                     type="number"
-                                    value={form.pointsReward}
-                                    onChange={(e) => setForm({ ...form, pointsReward: e.target.value })}
+                                    value={form.points}
+                                    onChange={(e) => setForm({ ...form, points: e.target.value })}
                                     className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                     placeholder="e.g., 100"
                                     min="0"

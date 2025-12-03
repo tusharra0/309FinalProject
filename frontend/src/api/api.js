@@ -1,26 +1,32 @@
 // Base API configuration and utilities
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+// In development prefer the Create React App proxy (empty base) so the dev server
+// will forward requests to the backend. In production fall back to an explicit
+// URL or the environment variable.
+const API_BASE = process.env.REACT_APP_API_URL !== undefined
+    ? process.env.REACT_APP_API_URL
+    : (process.env.NODE_ENV === 'development' ? '' : 'http://localhost:3000');
 
 /**
- * Get authentication token from localStorage
+ * Get authentication token from localStorage.
+ * The `AuthContext` stores the token under `authToken`, so use the same key.
  */
 const getAuthToken = () => {
-    return localStorage.getItem('token');
+    return localStorage.getItem('authToken');
 };
 
 /**
  * Store authentication token in localStorage
  */
 export const setAuthToken = (token) => {
-    localStorage.setItem('token', token);
+    localStorage.setItem('authToken', token);
 };
 
 /**
  * Remove authentication token from localStorage
  */
 export const clearAuthToken = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
 };
 
 /**
@@ -71,7 +77,16 @@ const request = async (path, options = {}) => {
  * Make a GET request
  */
 export const get = (path, params = {}) => {
-    const queryString = new URLSearchParams(params).toString();
+    // Remove undefined/null/empty-string params so backend validation doesn't
+    // reject requests where empty values are sent (e.g. role= or verified=).
+    const cleanedParams = Object.entries(params || {}).reduce((acc, [k, v]) => {
+        if (v === undefined || v === null) return acc;
+        if (typeof v === 'string' && v.trim() === '') return acc;
+        acc[k] = v;
+        return acc;
+    }, {});
+
+    const queryString = new URLSearchParams(cleanedParams).toString();
     const url = queryString ? `${path}?${queryString}` : path;
     return request(url, { method: 'GET' });
 };
