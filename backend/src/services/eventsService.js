@@ -251,7 +251,6 @@ const createEvent = async ({ body, user }) => {
       capacity,
       pointsTotal: points,
       pointsRemain: points,
-      createdById: user.id,
       createdBy: {
         connect: { id: user.id }
       }
