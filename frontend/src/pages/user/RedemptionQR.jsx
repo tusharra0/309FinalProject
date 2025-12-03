@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import QRCodeComponent from 'qrcode.react';
+import { QRCodeCanvas as QRCodeComponent } from 'qrcode.react';
 import { RefreshCw } from 'lucide-react';
 import { getMyTransactions } from '../../api/transactions';
 import LoadingSpinner from '../../components/LoadingSpinner';

@@ -1,5 +1,5 @@
 import React from 'react';
-import QRCodeComponent from 'qrcode.react';
+import { QRCodeCanvas as QRCodeComponent } from 'qrcode.react';
 import { Download } from 'lucide-react';
 import useUserStore from '../../store/userStore';
 

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import useUserStore from '../store/userStore';
 import {
     LogOut,
     User,
@@ -20,9 +21,17 @@ import {
 import logo from '../assets/logo.png';
 
 const AppLayout = () => {
-    const { role, logout } = useAuth();
+    const { token, role, logout } = useAuth();
+    const { user, fetchUser } = useUserStore();
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    // Fetch user data if token exists but user data is not loaded
+    useEffect(() => {
+        if (token && !user) {
+            fetchUser().catch(console.error);
+        }
+    }, [token, user, fetchUser]);
 
     const handleLogout = () => {
         logout();

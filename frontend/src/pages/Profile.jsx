@@ -12,10 +12,16 @@ const Profile = () => {
     const { user, updateUser, fetchUser } = useUserStore();
     const [activeTab, setActiveTab] = useState('info');
 
+    // Fetch user data if not loaded (e.g., after page reload)
+    useEffect(() => {
+        if (!user) {
+            fetchUser().catch(console.error);
+        }
+    }, [user, fetchUser]);
+
     // Profile info state
     const [profileForm, setProfileForm] = useState({
-        firstName: '',
-        lastName: '',
+        name: '',
         email: ''
     });
 
@@ -36,8 +42,7 @@ const Profile = () => {
     useEffect(() => {
         if (user) {
             setProfileForm({
-                firstName: user.firstName || '',
-                lastName: user.lastName || '',
+                name: user.name || '',
                 email: user.email || ''
             });
         }
@@ -143,31 +148,17 @@ const Profile = () => {
                             </div>
 
                             {/* Editable Fields */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                                        First Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={profileForm.firstName}
-                                        onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
-                                        className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                                        Last Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={profileForm.lastName}
-                                        onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
-                                        className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                                        required
-                                    />
-                                </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-300 mb-2">
+                                    Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={profileForm.name}
+                                    onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
+                                    className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    required
+                                />
                             </div>
 
                             <div>

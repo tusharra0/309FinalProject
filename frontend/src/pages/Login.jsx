@@ -7,6 +7,7 @@ import useUserStore from '../store/userStore';
 import { redirectPathForRole } from '../utils/auth';
 import ErrorMessage from '../components/ErrorMessage';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { useAuth } from '../context/AuthContext';
 
 const initialState = {
   utorid: '',
@@ -27,7 +28,8 @@ const createMockJwt = (role, userId = '123') => {
 
 const Login = () => {
   const navigate = useNavigate();
-  const { setUser } = useUserStore();
+  const { setUser, fetchUser } = useUserStore();
+  const { login: authLogin } = useAuth();
   const [form, setForm] = useState(initialState);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -51,11 +53,15 @@ const Login = () => {
         password: form.password
       });
 
-      // Store user and token in Zustand store
-      setUser(result.user, result.token);
+      // Set token in auth context
+      authLogin(result.token);
 
-      // Redirect based on role
-      const target = redirectPathForRole(result.user.role);
+      // Fetch and set user data
+      await fetchUser();
+
+      // Get user role for redirection
+      const { user } = useUserStore.getState();
+      const target = redirectPathForRole(user.role);
       navigate(target, { replace: true });
     } catch (err) {
       console.error('Login error:', err);
@@ -76,11 +82,15 @@ const Login = () => {
     try {
       const result = await loginWithGoogle(credential);
 
-      // Store user and token in Zustand store
-      setUser(result.user, result.token);
+      // Set token in auth context
+      authLogin(result.token);
 
-      // Redirect based on role
-      const target = redirectPathForRole(result.user.role);
+      // Fetch and set user data
+      await fetchUser();
+
+      // Get user role for redirection
+      const { user } = useUserStore.getState();
+      const target = redirectPathForRole(user.role);
       navigate(target, { replace: true });
     } catch (err) {
       setError(err.message || 'Google login failed');

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, AlertTriangle, DollarSign } from 'lucide-react';
-import { getTransactionById, updateTransactionSuspicious, createTransaction } from '../../api/transactions';
+import { getTransactionById, markTransactionSuspicious, createTransaction } from '../../api/transactions';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
 import SuccessMessage from '../../components/SuccessMessage';
@@ -36,7 +36,7 @@ const TransactionDetails = () => {
     const handleToggleSuspicious = async () => {
         try {
             setError('');
-            await updateTransactionSuspicious(transactionId, !transaction.suspicious);
+            await markTransactionSuspicious(transactionId, !transaction.suspicious);
             setSuccess(`Transaction ${!transaction.suspicious ? 'flagged as' : 'unflagged from'} suspicious`);
             fetchTransaction();
         } catch (err) {
@@ -183,8 +183,8 @@ const TransactionDetails = () => {
                                 <button
                                     onClick={handleToggleSuspicious}
                                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${transaction.suspicious
-                                            ? 'bg-red-600 hover:bg-red-500 text-white'
-                                            : 'bg-slate-700 hover:bg-slate-600 text-white'
+                                        ? 'bg-red-600 hover:bg-red-500 text-white'
+                                        : 'bg-slate-700 hover:bg-slate-600 text-white'
                                         }`}
                                 >
                                     {transaction.suspicious ? 'Unflag' : 'Flag as Suspicious'}

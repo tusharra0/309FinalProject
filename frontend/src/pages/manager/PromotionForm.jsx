@@ -74,7 +74,7 @@ const PromotionForm = () => {
     };
 
     const handleDelete = async () => {
-        if (!confirm('Are you sure you want to delete this promotion?')) return;
+        if (!window.confirm('Are you sure you want to delete this promotion?')) return;
 
         try {
             setError('');

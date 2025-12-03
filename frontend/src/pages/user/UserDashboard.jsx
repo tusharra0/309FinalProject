@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { QrCode, CreditCard, Plus, Minus } from 'lucide-react';
-import QRCodeComponent from 'qrcode.react';
+import { QRCodeCanvas as QRCodeComponent } from 'qrcode.react';
 import useUserStore from '../../store/userStore';
 import { getMyTransactions } from '../../api/transactions';
 import LoadingSpinner from '../../components/LoadingSpinner';
@@ -130,8 +130,8 @@ const UserDashboard = () => {
                                 <div key={transaction.id} className="flex items-center justify-between group">
                                     <div className="flex items-center gap-3">
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isPositiveTransaction(transaction)
-                                                ? 'bg-emerald-500/10 text-emerald-400'
-                                                : 'bg-orange-500/10 text-orange-400'
+                                            ? 'bg-emerald-500/10 text-emerald-400'
+                                            : 'bg-orange-500/10 text-orange-400'
                                             }`}>
                                             {isPositiveTransaction(transaction) ? <Plus size={14} /> : <Minus size={14} />}
                                         </div>
