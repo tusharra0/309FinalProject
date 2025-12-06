@@ -336,11 +336,16 @@ exports.getMyTransactions = async (req, res) => {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  try {
+    try {
+    // Forward all query parameters to the service so filters like `type` and
+    // other supported query params can be applied for user-specific lists.
     const { count, records } = await transactionsService.listUserTransactions({
       userId,
       page: req.query.page,
-      limit: req.query.limit
+      limit: req.query.limit,
+      orderBy: req.query.orderBy,
+      order: req.query.order,
+      ...req.query
     });
     return res.status(200).json({
       count,

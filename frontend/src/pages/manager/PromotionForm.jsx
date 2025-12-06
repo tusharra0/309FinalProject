@@ -14,8 +14,12 @@ const PromotionForm = () => {
     const [form, setForm] = useState({
         name: '',
         description: '',
-        pointCost: '',
-        active: true
+        type: 'automatic',
+        startTime: '',
+        endTime: '',
+        minSpending: '0',
+        rate: '0',
+        points: '0'
     });
 
     const [loading, setLoading] = useState(isEdit);
@@ -35,9 +39,13 @@ const PromotionForm = () => {
             const data = await getPromotion(promotionId);
             setForm({
                 name: data.name,
-                description: data.description,
-                pointCost: data.pointCost,
-                active: data.active
+                description: data.description || '',
+                type: data.type || 'automatic',
+                startTime: new Date(data.startTime).toISOString().slice(0, 16),
+                endTime: new Date(data.endTime).toISOString().slice(0, 16),
+                minSpending: data.minSpending?.toString() || '0',
+                rate: data.rate?.toString() || '0',
+                points: data.points?.toString() || '0'
             });
         } catch (err) {
             setError(err.message || 'Failed to load promotion');
@@ -51,11 +59,36 @@ const PromotionForm = () => {
         setError('');
         setSuccess('');
 
+        if (!form.startTime || !form.endTime) {
+            setError('Start time and end time are required');
+            return;
+        }
+
+        const startTime = new Date(form.startTime);
+        const endTime = new Date(form.endTime);
+        const now = new Date();
+
+        if (startTime <= now && !isEdit) {
+            setError('Start time must be in the future');
+            return;
+        }
+
+        if (startTime >= endTime) {
+            setError('End time must be after start time');
+            return;
+        }
+
         try {
             setSaving(true);
             const data = {
-                ...form,
-                pointCost: parseInt(form.pointCost)
+                name: form.name,
+                description: form.description || null,
+                type: form.type,
+                startTime: startTime.toISOString(),
+                endTime: endTime.toISOString(),
+                minSpending: form.minSpending ? parseFloat(form.minSpending) : 0,
+                rate: form.rate ? parseFloat(form.rate) : 0,
+                points: form.points ? parseInt(form.points) : 0
             };
 
             if (isEdit) {
@@ -131,7 +164,7 @@ const PromotionForm = () => {
 
                     <div>
                         <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Description *
+                            Description
                         </label>
                         <textarea
                             value={form.description}
@@ -139,39 +172,98 @@ const PromotionForm = () => {
                             className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             placeholder="Describe what this promotion offers..."
                             rows="4"
-                            required
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-2">
-                            Point Cost *
-                        </label>
-                        <input
-                            type="number"
-                            value={form.pointCost}
-                            onChange={(e) => setForm({ ...form, pointCost: e.target.value })}
-                            className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            placeholder="e.g., 100"
-                            min="1"
-                            required
-                        />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 bg-slate-800 rounded-lg border border-slate-700">
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <p className="text-white font-medium">Active</p>
-                            <p className="text-slate-400 text-sm">Make this promotion available to users</p>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Type *
+                            </label>
+                            <select
+                                value={form.type}
+                                onChange={(e) => setForm({ ...form, type: e.target.value })}
+                                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                required
+                            >
+                                <option value="automatic">Automatic</option>
+                                <option value="onetime">One Time</option>
+                            </select>
                         </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Min Spending ($)
+                            </label>
                             <input
-                                type="checkbox"
-                                checked={form.active}
-                                onChange={(e) => setForm({ ...form, active: e.target.checked })}
-                                className="sr-only peer"
+                                type="number"
+                                value={form.minSpending}
+                                onChange={(e) => setForm({ ...form, minSpending: e.target.value })}
+                                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                placeholder="0"
+                                min="0"
+                                step="0.01"
                             />
-                            <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                        </label>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Bonus Rate (%)
+                            </label>
+                            <input
+                                type="number"
+                                value={form.rate}
+                                onChange={(e) => setForm({ ...form, rate: e.target.value })}
+                                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                placeholder="0"
+                                min="0"
+                                step="0.01"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Fixed Points Bonus
+                            </label>
+                            <input
+                                type="number"
+                                value={form.points}
+                                onChange={(e) => setForm({ ...form, points: e.target.value })}
+                                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                placeholder="0"
+                                min="0"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                Start Time *
+                            </label>
+                            <input
+                                type="datetime-local"
+                                value={form.startTime}
+                                onChange={(e) => setForm({ ...form, startTime: e.target.value })}
+                                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">
+                                End Time *
+                            </label>
+                            <input
+                                type="datetime-local"
+                                value={form.endTime}
+                                onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+                                className="w-full rounded-lg bg-slate-800 border border-slate-700 px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                required
+                            />
+                        </div>
                     </div>
 
                     <div className="flex gap-4">

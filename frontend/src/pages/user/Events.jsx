@@ -25,13 +25,14 @@ const Events = () => {
                 page,
                 limit: 6,
                 published: true,
-                orderBy: 'eventDate',
+                orderBy: 'startTime',
                 order: 'asc'
             };
 
             const data = await listEvents(params);
-            setEvents(data.events || []);
-            setTotalPages(data.pagination?.totalPages || 1);
+            setEvents(data.results || data.events || []);
+            const total = data.count || 0;
+            setTotalPages(Math.max(1, Math.ceil(total / 6)));
         } catch (err) {
             setError(err.message || 'Failed to load events');
         } finally {
@@ -116,7 +117,7 @@ const Events = () => {
                                         </div>
                                     </div>
                                     <div className="bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full text-xs font-bold border border-indigo-500/20">
-                                        +{event.pointsReward} Pts
+                                        +{event.pointsAwarded ?? event.pointsRemain ?? 0} Pts
                                     </div>
                                 </div>
 
@@ -128,7 +129,7 @@ const Events = () => {
                                         </div>
                                         <div>
                                             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Date</div>
-                                            <div className="text-sm font-semibold text-slate-200">{formatDate(event.eventDate)}</div>
+                                            <div className="text-sm font-semibold text-slate-200">{formatDate(event.startTime)}</div>
                                         </div>
                                     </div>
                                     <div className="bg-slate-800 rounded-xl p-3 flex items-center border border-slate-700">
@@ -137,7 +138,7 @@ const Events = () => {
                                         </div>
                                         <div>
                                             <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Time</div>
-                                            <div className="text-sm font-semibold text-slate-200">{formatTime(event.eventDate)}</div>
+                                            <div className="text-sm font-semibold text-slate-200">{formatTime(event.startTime)}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -146,9 +147,9 @@ const Events = () => {
                                 <div className="flex items-center justify-between pt-4 border-t border-slate-800">
                                     <div className="flex items-center text-slate-400 text-sm">
                                         <UsersIcon size={18} className="mr-2" />
-                                        <span className="font-medium text-slate-300">{event.currentGuests || 0}</span>
+                                        <span className="font-medium text-slate-300">{event.numGuests || 0}</span>
                                         <span className="mx-1">/</span>
-                                        <span>{event.maxGuests} Guests</span>
+                                        <span>{event.capacity ?? '∞'} Guests</span>
                                     </div>
 
                                     {event.isGuest ? (

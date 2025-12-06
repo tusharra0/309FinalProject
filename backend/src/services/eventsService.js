@@ -321,9 +321,32 @@ const listEvents = async ({ user, query }) => {
         return guestCount < event.capacity;
       });
 
-  const count = filtered.length;
+  // Apply sorting
+  const orderBy = query.orderBy || 'id';
+  const order = query.order === 'asc' ? 1 : -1;
+
+  const sorted = filtered.sort((a, b) => {
+    let valA = a[orderBy];
+    let valB = b[orderBy];
+
+    if (valA === null || valA === undefined) valA = '';
+    if (valB === null || valB === undefined) valB = '';
+
+    if (typeof valA === 'string') {
+      return order * valA.localeCompare(valB);
+    }
+    if (typeof valA === 'number') {
+      return order * (valA - valB);
+    }
+    if (valA instanceof Date && valB instanceof Date) {
+      return order * (valA - valB);
+    }
+    return 0;
+  });
+
+  const count = sorted.length;
   const startIndex = (page - 1) * limit;
-  const paged = filtered.slice(startIndex, startIndex + limit);
+  const paged = sorted.slice(startIndex, startIndex + limit);
 
   return {
     count,

@@ -14,7 +14,7 @@ const Events = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [filters, setFilters] = useState({
         published: '',
-        orderBy: 'eventDate',
+        orderBy: 'createdAt',
         order: 'desc'
     });
 
@@ -30,8 +30,11 @@ const Events = () => {
                 limit: 10,
                 ...filters
             });
-            setEvents(data.events || []);
-            setTotalPages(data.pagination?.totalPages || 1);
+            // Backend returns { count, results }
+            setEvents(data.results || data.events || []);
+            // Calculate totalPages from count and limit
+            const totalCount = data.count || 0;
+            setTotalPages(Math.ceil(totalCount / 10) || 1);
         } catch (err) {
             setError(err.message || 'Failed to load events');
         } finally {
@@ -86,7 +89,7 @@ const Events = () => {
                             onChange={(e) => setFilters({ ...filters, orderBy: e.target.value })}
                             className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
-                            <option value="eventDate">Event Date</option>
+                            <option value="startTime">Event Date</option>
                             <option value="createdAt">Date Created</option>
                             <option value="name">Name</option>
                         </select>
@@ -138,19 +141,19 @@ const Events = () => {
                                                 📍 {event.location}
                                             </span>
                                             <span className="text-slate-400">
-                                                📅 {new Date(event.eventDate).toLocaleDateString()}
+                                                📅 {new Date(event.startTime).toLocaleDateString()}
                                             </span>
                                             <span className="text-slate-400">
-                                                ⏰ {new Date(event.eventDate).toLocaleTimeString()}
+                                                ⏰ {new Date(event.startTime).toLocaleTimeString()}
                                             </span>
                                             <span className="text-slate-400">
-                                                👥 {event.currentGuests || 0}/{event.maxGuests}
+                                                👥 {event.numGuests || 0}/{event.capacity || '∞'}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end gap-2 ml-4">
                                         <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full text-sm font-semibold">
-                                            +{event.pointsReward} pts
+                                            +{event.pointsRemain} pts
                                         </span>
                                         {event.published ? (
                                             <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-semibold border border-emerald-500/20">

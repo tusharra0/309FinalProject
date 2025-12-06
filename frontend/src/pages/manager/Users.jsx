@@ -32,8 +32,8 @@ const Users = () => {
                 orderBy: 'createdAt',
                 order: 'desc'
             });
-            setUsers(data.users || []);
-            setTotalPages(data.pagination?.totalPages || 1);
+            setUsers(data.results || data.users || []);
+            setTotalPages(Math.max(1, Math.ceil((data.count || 0) / 15)));
         } catch (err) {
             setError(err.message || 'Failed to load users');
         } finally {
@@ -143,7 +143,7 @@ const Users = () => {
                                             <td className="px-6 py-4">
                                                 <div>
                                                     <p className="text-white font-medium">
-                                                        {user.firstName} {user.lastName}
+                                                        {user.name}
                                                     </p>
                                                     <p className="text-slate-400 text-sm">{user.utorid}</p>
                                                 </div>

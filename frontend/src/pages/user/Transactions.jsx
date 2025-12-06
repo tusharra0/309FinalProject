@@ -29,8 +29,10 @@ const Transactions = () => {
                 limit: 20,
                 ...filters
             });
-            setTransactions(data.transactions || []);
-            setTotalPages(data.pagination?.totalPages || 1);
+            const results = data.results || data.transactions || [];
+            setTransactions(results);
+            const count = data.count ?? results.length;
+            setTotalPages(Math.max(1, Math.ceil((count || 0) / 20)));
         } catch (err) {
             setError(err.message || 'Failed to load transactions');
         } finally {
@@ -49,7 +51,8 @@ const Transactions = () => {
         return colors[type] || 'bg-slate-500/10 text-slate-400 border-slate-500/20';
     };
 
-    const isPositive = (transaction) => transaction.pointChange > 0;
+    const getAmount = (transaction) => transaction.amount ?? transaction.sent ?? transaction.awarded ?? transaction.pointsDelta ?? 0;
+    const isPositive = (transaction) => getAmount(transaction) > 0;
 
     if (loading && transactions.length === 0) {
         return (
@@ -98,7 +101,7 @@ const Transactions = () => {
                             className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
                             <option value="createdAt">Date</option>
-                            <option value="pointChange">Amount</option>
+                            <option value="pointsDelta">Amount</option>
                         </select>
                     </div>
 
@@ -157,15 +160,15 @@ const Transactions = () => {
                                                     {transaction.type}
                                                 </span>
                                             </div>
-                                            <p className="text-slate-400 text-sm">{transaction.description}</p>
+                                            <p className="text-slate-400 text-sm">{transaction.remark || transaction.description || ''}</p>
                                             <div className="flex items-center gap-4 mt-1">
                                                 <p className="text-slate-500 text-xs">
-                                                    {new Date(transaction.createdAt).toLocaleString()}
+                                                    {transaction.createdAt ? new Date(transaction.createdAt).toLocaleString() : ''}
                                                 </p>
-                                                {transaction.relatedUser && (
+                                                {(transaction.utorid || transaction.recipient || transaction.sender) && (
                                                     <p className="text-slate-500 text-xs">
                                                         {isPositive(transaction) ? 'From' : 'To'}:{' '}
-                                                        <span className="text-slate-400">{transaction.relatedUser.utorid}</span>
+                                                        <span className="text-slate-400">{transaction.utorid || transaction.recipient || transaction.sender}</span>
                                                     </p>
                                                 )}
                                             </div>
@@ -178,7 +181,7 @@ const Transactions = () => {
                                                     }`}
                                             >
                                                 {isPositive(transaction) ? '+' : ''}
-                                                {transaction.pointChange}
+                                                {getAmount(transaction)}
                                             </p>
                                             <p className="text-slate-500 text-xs">pts</p>
                                         </div>

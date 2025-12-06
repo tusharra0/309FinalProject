@@ -179,11 +179,22 @@ const listPromotions = async ({ user, query }) => {
 
   const skip = (page - 1) * limit;
 
+  // Build orderBy object from query parameters
+  const orderByField = query.orderBy || 'id';
+  const orderByValue = query.order === 'asc' ? 'asc' : 'desc';
+  
+  const orderBy = {};
+  if (['id', 'name', 'startTime', 'createdAt'].includes(orderByField)) {
+    orderBy[orderByField] = orderByValue;
+  } else {
+    orderBy.id = 'asc';
+  }
+
   const [count, records] = await Promise.all([
     prisma.promotion.count({ where }),
     prisma.promotion.findMany({
       where,
-      orderBy: { id: 'asc' },
+      orderBy,
       skip,
       take: limit
     })

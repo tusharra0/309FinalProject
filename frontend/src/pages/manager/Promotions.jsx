@@ -30,8 +30,11 @@ const Promotions = () => {
                 limit: 12,
                 ...filters
             });
-            setPromotions(data.promotions || []);
-            setTotalPages(data.pagination?.totalPages || 1);
+            // Backend returns { results, count }
+            setPromotions(data.results || data.promotions || []);
+            // Calculate totalPages from count and limit
+            const totalCount = data.count || 0;
+            setTotalPages(Math.ceil(totalCount / 12) || 1);
         } catch (err) {
             setError(err.message || 'Failed to load promotions');
         } finally {
@@ -132,22 +135,28 @@ const Promotions = () => {
                                 <div className="flex justify-between items-start mb-4">
                                     <h3 className="text-xl font-bold text-white">{promo.name}</h3>
                                     <div className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
-                                        <span className="text-indigo-400 text-sm font-bold">{promo.pointCost} pts</span>
+                                        <span className="text-indigo-400 text-sm font-bold">{promo.type}</span>
                                     </div>
                                 </div>
 
                                 <p className="text-slate-300 text-sm mb-4 line-clamp-2">{promo.description}</p>
 
-                                <div className="flex items-center justify-between pt-4 border-t border-slate-800">
-                                    {promo.active ? (
-                                        <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-semibold border border-emerald-500/20">
-                                            Active
-                                        </span>
-                                    ) : (
-                                        <span className="px-3 py-1 bg-slate-500/10 text-slate-400 rounded-full text-xs font-semibold border border-slate-500/20">
-                                            Inactive
-                                        </span>
+                                <div className="space-y-2 text-sm text-slate-400 mb-4">
+                                    {promo.minSpending > 0 && (
+                                        <p>Min Spending: ${promo.minSpending.toFixed(2)}</p>
                                     )}
+                                    {promo.rate > 0 && (
+                                        <p>Bonus Rate: {promo.rate.toFixed(2)}%</p>
+                                    )}
+                                    {promo.points > 0 && (
+                                        <p>Bonus Points: +{promo.points}</p>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+                                    <span className="text-slate-400 text-xs">
+                                        {new Date(promo.startTime).toLocaleDateString()} - {new Date(promo.endTime).toLocaleDateString()}
+                                    </span>
                                     <span className="text-indigo-400 text-sm font-medium">Edit →</span>
                                 </div>
                             </Link>

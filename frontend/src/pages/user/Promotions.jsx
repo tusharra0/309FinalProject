@@ -16,8 +16,8 @@ const Promotions = () => {
     const fetchPromotions = async () => {
         try {
             setLoading(true);
-            const data = await listPromotions({ active: true });
-            setPromotions(data.promotions || []);
+            const data = await listPromotions();
+            setPromotions(data.results || data.promotions || []);
         } catch (err) {
             setError(err.message || 'Failed to load promotions');
         } finally {
@@ -56,7 +56,7 @@ const Promotions = () => {
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="text-xl font-bold text-white">{promo.name}</h3>
                                 <div className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
-                                    <span className="text-indigo-400 text-sm font-bold">{promo.pointCost} pts</span>
+                                    <span className="text-indigo-400 text-sm font-bold">{promo.points ?? promo.pointCost ?? 0} pts</span>
                                 </div>
                             </div>
 
