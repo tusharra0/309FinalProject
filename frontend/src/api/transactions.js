@@ -48,4 +48,4 @@ export const markTransactionSuspicious = (id, suspicious) =>
  * Process a redemption transaction
  */
 export const processRedemption = (id) =>
-    patch(`/transactions/${id}/processed`, {});
+    patch(`/transactions/${id}/processed`, { processed: true });

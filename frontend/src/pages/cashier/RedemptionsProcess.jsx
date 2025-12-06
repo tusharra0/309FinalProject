@@ -54,7 +54,7 @@ const RedemptionsProcess = () => {
             setProcessing(true);
             setError('');
             await processRedemption(transaction.id);
-            setSuccess(`Successfully processed redemption for ${transaction.user?.utorid}`);
+            setSuccess(`Successfully processed redemption for ${transaction.utorid}`);
 
             // Reset
             setTransaction(null);
@@ -111,22 +111,20 @@ const RedemptionsProcess = () => {
                             <div className="grid grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <p className="text-slate-500 text-xs mb-1">Customer</p>
-                                    <p className="text-white font-semibold">
-                                        {transaction.user?.firstName} {transaction.user?.lastName}
-                                    </p>
-                                    <p className="text-slate-400 text-sm">{transaction.user?.utorid}</p>
+                                    <p className="text-white font-semibold">{transaction.utorid ?? 'Unknown'}</p>
+                                    <p className="text-slate-400 text-sm">{transaction.utorid ?? ''}</p>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-slate-500 text-xs mb-1">Redemption Value</p>
                                     <p className="text-red-400 font-bold text-2xl">
-                                        {transaction.pointChange} pts
+                                        {Math.abs(transaction.amount ?? transaction.pointsDelta ?? 0)} pts
                                     </p>
                                 </div>
                             </div>
 
                             <div className="pt-4 border-t border-slate-700">
                                 <p className="text-slate-500 text-xs mb-1">Description</p>
-                                <p className="text-white">{transaction.description}</p>
+                                <p className="text-white">{transaction.remark ?? `Redeem: ${transaction.utorid ?? ''}`}</p>
                             </div>
 
                             <div className="pt-4 border-t border-slate-700 mt-4">
