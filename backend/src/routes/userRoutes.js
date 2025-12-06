@@ -6,6 +6,7 @@ const {
   createUser,
   getAllUsers,
   getUserById,
+  searchUser,
   updateUserById,
   getMyInfo,
   updateMyInfo,
@@ -36,6 +37,10 @@ router.patch('/me', authRequired, uploadAvatar, handleUploadError, updateMyInfo)
 // GET /users/me/transactions 
 // List current user's transactions
 router.get('/me/transactions', authRequired, getMyTransactions);
+
+// GET /users/search
+// Search for a user by ID or utorid (public to authenticated users)
+router.get('/search', authRequired, searchUser);
 
 // POST /users/me/transactions 
 // Create redemption request

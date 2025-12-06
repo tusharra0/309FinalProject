@@ -29,6 +29,11 @@ const Events = () => {
                 order: 'asc'
             };
 
+            // If user selected "Joined", request only events they've RSVP'd to
+            if (filter === 'joined') {
+                params.joined = 'true';
+            }
+
             const data = await listEvents(params);
             setEvents(data.results || data.events || []);
             const total = data.count || 0;
@@ -105,8 +110,20 @@ const Events = () => {
                             <Link
                                 key={event.id}
                                 to={`/user/events/${event.id}`}
-                                className="relative bg-slate-900 rounded-2xl p-6 shadow-sm border-l-4 border-indigo-500 border-y border-r border-slate-800 hover:border-indigo-400 transition-colors"
+                                className={`relative bg-slate-900 rounded-2xl p-6 shadow-sm border-l-4 border-y border-r transition-colors ${
+                                    event.isGuest
+                                        ? 'border-l-emerald-500 border-emerald-500/30 hover:border-emerald-400'
+                                        : 'border-l-indigo-500 border-slate-800 hover:border-indigo-400'
+                                }`}
                             >
+                                {/* RSVP Badge Overlay */}
+                                {event.isGuest && (
+                                    <div className="absolute top-4 right-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                                        <CheckCircle size={14} />
+                                        RSVPed
+                                    </div>
+                                )}
+
                                 {/* Header */}
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
@@ -153,9 +170,9 @@ const Events = () => {
                                     </div>
 
                                     {event.isGuest ? (
-                                        <div className="bg-green-500/10 text-green-400 px-4 py-2 rounded-lg text-sm font-bold flex items-center border border-green-500/20">
+                                        <div className="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-lg text-sm font-bold flex items-center border border-emerald-500/20">
                                             <CheckCircle size={16} className="mr-1" />
-                                            Confirmed
+                                            Going
                                         </div>
                                     ) : (
                                         <div className="bg-white hover:bg-slate-200 text-slate-900 px-4 py-2 rounded-lg text-sm font-bold transition-colors">

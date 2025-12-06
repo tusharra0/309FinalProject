@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Send, User } from 'lucide-react';
 import { createTransfer } from '../../api/transactions';
-import { getUserById } from '../../api/users';
+import { searchUser } from '../../api/users';
 import useUserStore from '../../store/userStore';
 import ErrorMessage from '../../components/ErrorMessage';
 import SuccessMessage from '../../components/SuccessMessage';
@@ -29,7 +29,9 @@ const Transfer = () => {
         try {
             setSearchLoading(true);
             setError('');
-            const foundUser = await getUserById(recipientId);
+            // Try searching by ID first, if not a number, search by utorid
+            const query = isNaN(recipientId) ? { utorid: recipientId } : { id: recipientId };
+            const foundUser = await searchUser(query);
             setRecipient(foundUser);
         } catch (err) {
             setError(err.message || 'User not found');
@@ -63,8 +65,8 @@ const Transfer = () => {
         try {
             setLoading(true);
             await createTransfer(recipient.id, {
-                pointChange: points,
-                description: description || `Transfer to ${recipient.utorid}`
+                amount: points,
+                remark: description || `Transfer to ${recipient.utorid}`
             });
 
             // Update local points balance

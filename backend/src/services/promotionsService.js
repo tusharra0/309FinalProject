@@ -141,7 +141,25 @@ const listPromotions = async ({ user, query }) => {
   const isPrivileged = isManager(user);
   const where = {};
 
-  if (!isPrivileged) {
+  const parseFlag = (value) => {
+    if (value === undefined) return undefined;
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    throw createError(400, 'Invalid filter flag.');
+  };
+
+  // Handle active filter (applies to all users)
+  const active = parseFlag(query.active);
+  if (active !== undefined) {
+    if (active) {
+      Object.assign(where, buildActiveWhere());
+    }
+    // If active=false, don't restrict by time (only managers can see inactive)
+    if (active === false && !isPrivileged) {
+      throw createError(403, 'Permission denied.');
+    }
+  } else if (!isPrivileged) {
+    // Default behavior: regular users always see only active promotions
     Object.assign(where, buildActiveWhere());
   }
 
@@ -152,13 +170,6 @@ const listPromotions = async ({ user, query }) => {
   if (query.type && isPrivileged) {
     where.type = normalizeType(query.type);
   }
-
-  const parseFlag = (value) => {
-    if (value === undefined) return undefined;
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    throw createError(400, 'Invalid filter flag.');
-  };
 
   const started = parseFlag(query.started);
   const ended = parseFlag(query.ended);

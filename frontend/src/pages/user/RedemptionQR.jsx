@@ -10,6 +10,19 @@ const RedemptionQR = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
+    const formatDate = (dateString) => {
+        try {
+            if (!dateString) return new Date().toLocaleDateString();
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                return new Date().toLocaleDateString();
+            }
+            return date.toLocaleDateString();
+        } catch (err) {
+            return new Date().toLocaleDateString();
+        }
+    };
+
     useEffect(() => {
         fetchRedemptions();
         // Poll every 10 seconds to check for processed redemptions
@@ -27,7 +40,7 @@ const RedemptionQR = () => {
                 orderBy: 'createdAt',
                 order: 'desc'
             });
-            setRedemptions(data.transactions || []);
+            setRedemptions(data.results || data.transactions || []);
             setError('');
         } catch (err) {
             setError(err.message || 'Failed to load redemptions');
@@ -84,16 +97,16 @@ const RedemptionQR = () => {
 
                             <div className="text-center w-full">
                                 <p className="text-white font-semibold mb-1">
-                                    {redemption.description}
+                                    {redemption.remark || 'Redemption Request'}
                                 </p>
                                 <p className="text-red-400 font-bold text-lg mb-2">
-                                    {redemption.pointChange} points
+                                    {Math.abs(redemption.amount || redemption.pointsDelta || 0)} points
                                 </p>
                                 <p className="text-slate-500 text-xs mb-1">
                                     Transaction ID: #{redemption.id}
                                 </p>
                                 <p className="text-slate-500 text-xs">
-                                    Created: {new Date(redemption.createdAt).toLocaleString()}
+                                    Date: {formatDate(redemption.createdAt)}
                                 </p>
                                 <div className="mt-3 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-full inline-block">
                                     <span className="text-orange-400 text-xs font-semibold">Pending</span>

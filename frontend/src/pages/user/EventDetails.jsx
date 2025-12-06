@@ -177,9 +177,9 @@ const EventDetails = () => {
                     <div className="pt-6 border-t border-slate-800">
                         {event.isGuest ? (
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <div className="flex-1 bg-green-500/10 border border-green-500/20 rounded-lg p-4 flex items-center justify-center">
-                                    <CheckCircle className="text-green-400 mr-2" size={20} />
-                                    <span className="text-green-400 font-semibold">You're attending this event!</span>
+                                <div className="flex-1 bg-emerald-500/20 border-2 border-emerald-400 rounded-lg p-5 flex items-center justify-center">
+                                    <CheckCircle className="text-emerald-400 mr-3" size={24} />
+                                    <span className="text-emerald-400 font-bold text-lg">RSVPed ✓</span>
                                 </div>
                                 <button
                                     onClick={handleCancelRSVP}
@@ -199,7 +199,7 @@ const EventDetails = () => {
                             >
                                 {actionLoading && <LoadingSpinner size="sm" />}
                                 <CheckCircle size={20} />
-                                {isFull ? 'Event Full' : actionLoading ? 'Processing...' : 'RSVP to Event'}
+                                {isFull ? 'Event Full' : actionLoading ? 'Processing...' : 'RSVP Now'}
                             </button>
                         )}
                     </div>

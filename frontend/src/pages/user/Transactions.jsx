@@ -180,8 +180,8 @@ const Transactions = () => {
                                                 className={`text-2xl font-bold ${isPositive(transaction) ? 'text-emerald-400' : 'text-slate-300'
                                                     }`}
                                             >
-                                                {isPositive(transaction) ? '+' : ''}
-                                                {getAmount(transaction)}
+                                                {isPositive(transaction) ? '+' : '-'}
+                                                {Math.abs(getAmount(transaction))}
                                             </p>
                                             <p className="text-slate-500 text-xs">pts</p>
                                         </div>

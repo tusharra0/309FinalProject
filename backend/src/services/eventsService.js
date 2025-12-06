@@ -91,7 +91,7 @@ const presentCreatedEvent = (event) => ({
   guests: []
 });
 
-const presentEventSummary = (event) => ({
+const presentEventSummary = (event, userId = null) => ({
   id: event.id,
   name: event.name,
   location: event.location,
@@ -101,7 +101,8 @@ const presentEventSummary = (event) => ({
   pointsRemain: event.pointsRemain,
   pointsAwarded: event.pointsAwarded,
   published: event.published,
-  numGuests: (event.guests || []).length
+  numGuests: (event.guests || []).length,
+  isGuest: userId ? isGuest(event, userId) : false
 });
 
 
@@ -305,6 +306,20 @@ const listEvents = async ({ user, query }) => {
     where.published = query.published === 'true';
   }
 
+  // If client requests only events the current user has joined
+  if (query.joined === 'true') {
+    if (!user || !user.id) {
+      throw createError(401, 'Authentication required to filter joined events.');
+    }
+    // Filter events where there exists a guest link for the current user
+    where.guests = {
+      some: {
+        userId: user.id,
+        removedAt: null
+      }
+    };
+  }
+
   const baseEvents = await prisma.event.findMany({
     where,
     include: organizerInclude,
@@ -350,7 +365,7 @@ const listEvents = async ({ user, query }) => {
 
   return {
     count,
-    results: paged.map((event) => presentEventSummary(event))
+    results: paged.map((event) => presentEventSummary(event, user?.id))
   };
 };
 

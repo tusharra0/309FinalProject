@@ -50,7 +50,8 @@ const formatTransaction = (transaction) => {
         processed: transaction.processed,
         processedBy: transaction.processedBy?.utorid ?? null,
         remark: transaction.remark ?? null,
-        createdBy: baseCreatedBy(transaction)
+        createdBy: baseCreatedBy(transaction),
+        createdAt: transaction.createdAt
       };
     case 'event':
       return {

@@ -519,10 +519,18 @@ const createRedemptionRequest = async ({ userId, amount, remark }) => {
       throw createError(400, 'Insufficient points');
     }
 
+    // Decrement the user's points by the redemption amount
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        points: { decrement: numericAmount }
+      }
+    });
+
     const transaction = await tx.transaction.create({
       data: {
         type: TransactionType.redemption,
-        pointsDelta: numericAmount,
+        pointsDelta: -numericAmount,
         remark,
         userId: user.id,
         createdById: user.id

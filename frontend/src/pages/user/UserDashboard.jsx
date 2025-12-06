@@ -20,11 +20,11 @@ const UserDashboard = () => {
             try {
                 setLoading(true);
                 const data = await getMyTransactions({
-                    limit: 5,
+                    limit: 3,
                     orderBy: 'createdAt',
                     order: 'desc'
                 });
-                setRecentActivity(data.transactions || []);
+                setRecentActivity(data.results || data.transactions || []);
             } catch (err) {
                 console.error('Failed to fetch transactions:', err);
                 setError(err.message);
@@ -41,7 +41,8 @@ const UserDashboard = () => {
     };
 
     const isPositiveTransaction = (transaction) => {
-        return transaction.pointChange > 0;
+        const amount = transaction.amount ?? transaction.sent ?? transaction.awarded ?? transaction.pointsDelta ?? 0;
+        return amount > 0;
     };
 
     return (
@@ -136,15 +137,15 @@ const UserDashboard = () => {
                                             {isPositiveTransaction(transaction) ? <Plus size={14} /> : <Minus size={14} />}
                                         </div>
                                         <div>
-                                            <p className="text-white text-sm font-medium">{formatTransactionType(transaction.type)}</p>
-                                            <p className="text-slate-500 text-[10px]">
-                                                {new Date(transaction.createdAt).toLocaleDateString()}
+                                            <p className="text-white text-base font-medium">{formatTransactionType(transaction.type)}</p>
+                                            <p className="text-slate-500 text-sm">
+                                                {transaction.createdAt ? new Date(transaction.createdAt).toLocaleDateString() : 'Today'}
                                             </p>
                                         </div>
                                     </div>
-                                    <span className={`text-sm font-bold ${isPositiveTransaction(transaction) ? 'text-emerald-400' : 'text-slate-300'
+                                    <span className={`text-base font-bold ${isPositiveTransaction(transaction) ? 'text-emerald-400' : 'text-slate-300'
                                         }`}>
-                                        {isPositiveTransaction(transaction) ? '+' : ''}{transaction.pointChange}
+                                        {isPositiveTransaction(transaction) ? '+' : '-'}{Math.abs(transaction.amount ?? transaction.sent ?? transaction.awarded ?? transaction.pointsDelta ?? 0)}
                                     </span>
                                 </div>
                             ))}

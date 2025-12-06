@@ -143,6 +143,65 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+// Search for a user by ID or utorid - public endpoint for authenticated users
+exports.searchUser = async (req, res) => {
+  try {
+    const { id, utorid } = req.query;
+
+    if (!id && !utorid) {
+      return res.status(400).json({
+        message: 'Either id or utorid query parameter is required'
+      });
+    }
+
+    let user = null;
+
+    if (id) {
+      const userId = parseInt(id, 10);
+      if (isNaN(userId)) {
+        return res.status(400).json({
+          message: 'Invalid user ID'
+        });
+      }
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          utorid: true,
+          name: true,
+          email: true,
+          role: true,
+          avatarUrl: true
+        }
+      });
+    } else if (utorid) {
+      user = await prisma.user.findUnique({
+        where: { utorid: utorid.toLowerCase() },
+        select: {
+          id: true,
+          utorid: true,
+          name: true,
+          email: true,
+          role: true,
+          avatarUrl: true
+        }
+      });
+    }
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found.'
+      });
+    }
+
+    return res.status(200).json(user);
+
+  } catch (err) {
+    console.error('Failed to search user:', err);
+    return res.status(500).json({ message: 'Failed to search user' });
+  }
+};
+
 exports.getUserById = async (req, res) => {
   try {
     const userId = parseInt(req.params.id, 10);

@@ -122,6 +122,31 @@ const useUserStore = create((set, get) => ({
         const user = get().user;
         return user?.points || 0;
     },
+
+    /**
+     * Refresh user data from server (recalculates points, etc)
+     */
+    refreshUser: async () => {
+        try {
+            set({ isLoading: true, error: null });
+            const user = await getMyInfo();
+            set({
+                user,
+                isAuthenticated: true,
+                isLoading: false,
+                error: null
+            });
+            return user;
+        } catch (error) {
+            set({
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+                error: error.message
+            });
+            throw error;
+        }
+    },
 }));
 
 export default useUserStore;

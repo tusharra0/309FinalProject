@@ -29,6 +29,16 @@ export const getAllUsers = (params = {}) => get('/users', params);
 export const getUserById = (id) => get(`/users/${id}`);
 
 /**
+ * Search for a user by ID or utorid (for transfer recipient lookup)
+ */
+export const searchUser = (query) => {
+  const params = {};
+  if (query.id) params.id = query.id;
+  if (query.utorid) params.utorid = query.utorid;
+  return get('/users/search', params);
+};
+
+/**
  * Update a specific user (manager/superuser only)
  */
 export const updateUserById = (id, data) => patch(`/users/${id}`, data);
