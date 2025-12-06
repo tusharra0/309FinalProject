@@ -25,12 +25,14 @@ const Roles = () => {
             const data = await getAllUsers({
                 page,
                 limit: 15,
-                search,
+                name: search,
                 orderBy: 'createdAt',
                 order: 'desc'
             });
-            setUsers(data.users || []);
-            setTotalPages(data.pagination?.totalPages || 1);
+            // Backend returns { count, results }
+            setUsers(data.results || data.users || []);
+            const count = data.count || 0;
+            setTotalPages(Math.max(1, Math.ceil(count / 15)));
         } catch (err) {
             setError(err.message || 'Failed to load users');
         } finally {
@@ -120,7 +122,7 @@ const Roles = () => {
                                             <td className="px-6 py-4">
                                                 <div>
                                                     <p className="text-white font-medium">
-                                                        {user.firstName} {user.lastName}
+                                                        {user.name || `${user.firstName} ${user.lastName}`.trim() || 'N/A'}
                                                     </p>
                                                     <p className="text-slate-400 text-sm">{user.utorid}</p>
                                                 </div>
