@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Users as UsersIcon, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users as UsersIcon, CheckCircle, X } from 'lucide-react';
 import { listEvents } from '../../api/events';
+import { cancelRsvp } from '../../api/events';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
 import Pagination from '../../components/Pagination';
@@ -13,6 +14,8 @@ const Events = () => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [filter, setFilter] = useState('all'); // all, joined
+    const [hoveredEvent, setHoveredEvent] = useState(null);
+    const [cancellingEvent, setCancellingEvent] = useState(null);
 
     useEffect(() => {
         fetchEvents();
@@ -170,9 +173,37 @@ const Events = () => {
                                     </div>
 
                                     {event.isGuest ? (
-                                        <div className="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-lg text-sm font-bold flex items-center border border-emerald-500/20">
-                                            <CheckCircle size={16} className="mr-1" />
-                                            Going
+                                        <div
+                                            onMouseEnter={() => setHoveredEvent(event.id)}
+                                            onMouseLeave={() => setHoveredEvent(null)}
+                                        >
+                                            {hoveredEvent === event.id ? (
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.preventDefault();
+                                                        if (cancellingEvent) return;
+                                                        try {
+                                                            setCancellingEvent(event.id);
+                                                            await cancelRsvp(event.id);
+                                                            await fetchEvents();
+                                                        } catch (err) {
+                                                            setError(err.message || 'Failed to cancel RSVP');
+                                                        } finally {
+                                                            setCancellingEvent(null);
+                                                        }
+                                                    }}
+                                                    disabled={cancellingEvent === event.id}
+                                                    className="bg-rose-600/10 text-rose-400 px-4 py-2 rounded-lg text-sm font-bold flex items-center border border-rose-500/20"
+                                                >
+                                                    <X size={16} className="mr-1" />
+                                                    {cancellingEvent === event.id ? 'Cancelling...' : 'Cancel RSVP'}
+                                                </button>
+                                            ) : (
+                                                <div className="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-lg text-sm font-bold flex items-center border border-emerald-500/20">
+                                                    <CheckCircle size={16} className="mr-1" />
+                                                    Going
+                                                </div>
+                                            )}
                                         </div>
                                     ) : (
                                         <div className="bg-white hover:bg-slate-200 text-slate-900 px-4 py-2 rounded-lg text-sm font-bold transition-colors">
