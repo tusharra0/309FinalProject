@@ -185,10 +185,6 @@ exports.getTransactions = async (req, res) => {
 };
 
 exports.getTransactionById = async (req, res) => {
-  if (!['manager', 'superuser'].includes(req.user?.role)) {
-    return permissionError(res);
-  }
-
   const transactionId = Number(req.params.transactionId);
   if (!Number.isInteger(transactionId)) {
     return res.status(400).json({ message: 'Invalid transaction id' });
@@ -196,7 +192,24 @@ exports.getTransactionById = async (req, res) => {
 
   try {
     const transaction = await transactionsService.findTransactionById(transactionId);
-    return res.status(200).json(formatTransaction(transaction));
+
+    // Allow managers and superusers full access
+    const role = req.user?.role;
+    if (['manager', 'superuser'].includes(role)) {
+      return res.status(200).json(formatTransaction(transaction));
+    }
+
+    // Allow cashiers to fetch redemptions (so they can process them) or
+    // transactions they created. Regular users are not permitted here.
+    if (role === 'cashier') {
+      if (transaction.type === 'redemption' || transaction.createdById === req.user?.id) {
+        return res.status(200).json(formatTransaction(transaction));
+      }
+      return permissionError(res);
+    }
+
+    // All other roles (including regular users) are denied
+    return permissionError(res);
   } catch (err) {
     if (err.status) {
       return res.status(err.status).json({ message: err.message });

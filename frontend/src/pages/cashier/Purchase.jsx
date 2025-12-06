@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ShoppingCart, User, Plus } from 'lucide-react';
 import { createTransaction } from '../../api/transactions';
-import { getUserById } from '../../api/users';
+import { searchUser } from '../../api/users';
 import { listPromotions } from '../../api/promotions';
 import ErrorMessage from '../../components/ErrorMessage';
 import SuccessMessage from '../../components/SuccessMessage';
@@ -26,7 +26,8 @@ const Purchase = () => {
         try {
             setSearchLoading(true);
             setError('');
-            const foundUser = await getUserById(userId);
+            const query = isNaN(userId) ? { utorid: userId } : { id: userId };
+            const foundUser = await searchUser(query);
             setUser(foundUser);
         } catch (err) {
             setError(err.message || 'User not found');
@@ -56,9 +57,9 @@ const Purchase = () => {
             setLoading(true);
             await createTransaction({
                 type: 'purchase',
-                userId: user.id,
-                pointChange: pointChange,
-                description: description || `Purchase at store`
+                utorid: user.utorid,
+                spent: pointChange,
+                remark: description || `Purchase at store`
             });
 
             setSuccess(`Successfully awarded ${pointChange} points to ${user.utorid}`);
