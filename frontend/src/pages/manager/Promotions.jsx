@@ -25,11 +25,18 @@ const Promotions = () => {
     const fetchPromotions = async () => {
         try {
             setLoading(true);
-            const data = await listPromotions({
-                page,
-                limit: 12,
-                ...filters
-            });
+            // Only send active filter if it's not empty; otherwise show all for managers
+            const query = { page, limit: 12 };
+            if (filters.active) {
+                query.active = filters.active;
+            }
+            if (filters.orderBy) {
+                query.orderBy = filters.orderBy;
+            }
+            if (filters.order) {
+                query.order = filters.order;
+            }
+            const data = await listPromotions(query);
             // Backend returns { results, count }
             setPromotions(data.results || data.promotions || []);
             // Calculate totalPages from count and limit
@@ -90,7 +97,7 @@ const Promotions = () => {
                             className="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         >
                             <option value="createdAt">Date Created</option>
-                            <option value="pointCost">Point Cost</option>
+                            <option value="points">Point Cost</option>
                             <option value="name">Name</option>
                         </select>
                     </div>

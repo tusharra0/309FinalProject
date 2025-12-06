@@ -6,6 +6,14 @@ const toPromotionIds = (transaction) =>
 const baseCreatedBy = (transaction) => transaction.createdBy?.utorid ?? null;
 
 const formatTransaction = (transaction) => {
+  const userInfo = transaction.user
+    ? { utorid: transaction.user.utorid ?? null, email: transaction.user.email ?? null }
+    : transaction.sender
+    ? { utorid: transaction.sender.utorid ?? null, email: transaction.sender.email ?? null }
+    : transaction.recipient
+    ? { utorid: transaction.recipient.utorid ?? null, email: transaction.recipient.email ?? null }
+    : null;
+
   switch (transaction.type) {
     case 'purchase':
       return {
@@ -18,6 +26,9 @@ const formatTransaction = (transaction) => {
         suspicious: transaction.suspicious,
         remark: transaction.remark ?? null,
         createdBy: baseCreatedBy(transaction)
+        ,
+        createdAt: transaction.createdAt,
+        user: userInfo
       };
     case 'adjustment':
       return {
@@ -30,6 +41,9 @@ const formatTransaction = (transaction) => {
         suspicious: transaction.suspicious,
         remark: transaction.remark ?? null,
         createdBy: baseCreatedBy(transaction)
+        ,
+        createdAt: transaction.createdAt,
+        user: userInfo
       };
     case 'transfer':
       return {
@@ -39,7 +53,9 @@ const formatTransaction = (transaction) => {
         type: 'transfer',
         sent: transaction.pointsDelta,
         remark: transaction.remark ?? null,
-        createdBy: baseCreatedBy(transaction)
+        createdBy: baseCreatedBy(transaction),
+        createdAt: transaction.createdAt,
+        user: userInfo
       };
     case 'redemption':
       return {
@@ -51,7 +67,8 @@ const formatTransaction = (transaction) => {
         processedBy: transaction.processedBy?.utorid ?? null,
         remark: transaction.remark ?? null,
         createdBy: baseCreatedBy(transaction),
-        createdAt: transaction.createdAt
+        createdAt: transaction.createdAt,
+        user: userInfo
       };
     case 'event':
       return {
@@ -62,6 +79,9 @@ const formatTransaction = (transaction) => {
         eventId: transaction.eventId ?? null,
         remark: transaction.remark ?? null,
         createdBy: baseCreatedBy(transaction)
+        ,
+        createdAt: transaction.createdAt,
+        user: userInfo
       };
     default:
       return {
@@ -69,7 +89,9 @@ const formatTransaction = (transaction) => {
         type: transaction.type,
         amount: transaction.pointsDelta,
         remark: transaction.remark ?? null,
-        createdBy: baseCreatedBy(transaction)
+        createdBy: baseCreatedBy(transaction),
+        createdAt: transaction.createdAt,
+        user: userInfo
       };
   }
 };

@@ -150,18 +150,24 @@ const listPromotions = async ({ user, query }) => {
 
   // Handle active filter (applies to all users)
   const active = parseFlag(query.active);
-  if (active !== undefined) {
-    if (active) {
-      Object.assign(where, buildActiveWhere());
-    }
-    // If active=false, don't restrict by time (only managers can see inactive)
-    if (active === false && !isPrivileged) {
+  if (active === true) {
+    // Show only active promotions
+    Object.assign(where, buildActiveWhere());
+  } else if (active === false) {
+    // Show only inactive promotions (only managers can)
+    if (!isPrivileged) {
       throw createError(403, 'Permission denied.');
     }
+    // For managers: show promotions that are NOT active
+    where.OR = [
+      { startTime: { gt: new Date() } },
+      { endTime: { lt: new Date() } }
+    ];
   } else if (!isPrivileged) {
     // Default behavior: regular users always see only active promotions
     Object.assign(where, buildActiveWhere());
   }
+  // If active is undefined and user is privileged (manager), show all (no time filter)
 
   if (query.name) {
     where.name = { contains: query.name, mode: 'insensitive' };
@@ -195,7 +201,7 @@ const listPromotions = async ({ user, query }) => {
   const orderByValue = query.order === 'asc' ? 'asc' : 'desc';
   
   const orderBy = {};
-  if (['id', 'name', 'startTime', 'createdAt'].includes(orderByField)) {
+  if (['id', 'name', 'startTime', 'createdAt', 'points'].includes(orderByField)) {
     orderBy[orderByField] = orderByValue;
   } else {
     orderBy.id = 'asc';

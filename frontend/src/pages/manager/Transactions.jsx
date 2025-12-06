@@ -32,8 +32,11 @@ const Transactions = () => {
                 limit: 20,
                 ...filters
             });
-            setTransactions(data.transactions || []);
-            setTotalPages(data.pagination?.totalPages || 1);
+            // Backend returns { count, results }
+            const results = data.results || data.transactions || [];
+            setTransactions(results);
+            const count = data.count ?? data.total ?? 0;
+            setTotalPages(Math.max(1, Math.ceil(count / 20)));
         } catch (err) {
             setError(err.message || 'Failed to load transactions');
         } finally {
@@ -124,6 +127,7 @@ const Transactions = () => {
                         >
                             <option value="createdAt">Date</option>
                             <option value="pointChange">Amount</option>
+                            <option value="pointsDelta">Amount</option>
                         </select>
                     </div>
 
@@ -170,8 +174,8 @@ const Transactions = () => {
                                             <td className="px-6 py-4 text-slate-300">#{tx.id}</td>
                                             <td className="px-6 py-4">
                                                 <div>
-                                                    <p className="text-white font-medium">{tx.user?.utorid || 'N/A'}</p>
-                                                    <p className="text-slate-400 text-sm">{tx.user?.email || ''}</p>
+                                                    <p className="text-white font-medium">{tx.user?.utorid ?? tx.utorid ?? tx.sender ?? tx.recipient ?? 'N/A'}</p>
+                                                    <p className="text-slate-400 text-sm">{tx.user?.email ?? tx.email ?? ''}</p>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">
@@ -180,12 +184,21 @@ const Transactions = () => {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span className={`font-bold ${tx.pointChange > 0 ? 'text-emerald-400' : 'text-slate-300'}`}>
-                                                    {tx.pointChange > 0 ? '+' : ''}{tx.pointChange}
-                                                </span>
+                                                {(() => {
+                                                    const val = tx.sent ?? tx.awarded ?? tx.amount ?? tx.pointsDelta ?? 0;
+                                                    const positive = Number(val) > 0;
+                                                    return (
+                                                        <span className={`font-bold ${positive ? 'text-emerald-400' : 'text-slate-300'}`}>
+                                                            {positive ? '+' : ''}{val}
+                                                        </span>
+                                                    );
+                                                })()}
                                             </td>
                                             <td className="px-6 py-4 text-slate-300 text-sm">
-                                                {new Date(tx.createdAt).toLocaleDateString()}
+                                                {(() => {
+                                                    const d = tx.createdAt ?? tx.created ?? tx.transaction?.createdAt;
+                                                    return d ? new Date(d).toLocaleDateString() : '';
+                                                })()}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-col gap-1">
@@ -195,7 +208,7 @@ const Transactions = () => {
                                                             Suspicious
                                                         </span>
                                                     )}
-                                                    {tx.type === 'redemption' && (
+                                                    {tx.type === 'redemption' ? (
                                                         tx.processed ? (
                                                             <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-semibold border border-emerald-500/20 w-fit">
                                                                 Processed
@@ -205,6 +218,10 @@ const Transactions = () => {
                                                                 Pending
                                                             </span>
                                                         )
+                                                    ) : (
+                                                        <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-semibold border border-emerald-500/20 w-fit">
+                                                            Completed
+                                                        </span>
                                                     )}
                                                 </div>
                                             </td>
