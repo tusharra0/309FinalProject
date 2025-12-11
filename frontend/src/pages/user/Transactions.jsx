@@ -26,13 +26,13 @@ const Transactions = () => {
             setLoading(true);
             const data = await getMyTransactions({
                 page,
-                limit: 20,
+                limit: 5,
                 ...filters
             });
             const results = data.results || data.transactions || [];
             setTransactions(results);
             const count = data.count ?? results.length;
-            setTotalPages(Math.max(1, Math.ceil((count || 0) / 20)));
+            setTotalPages(Math.max(1, Math.ceil((count || 0) / 5)));
         } catch (err) {
             setError(err.message || 'Failed to load transactions');
         } finally {
@@ -139,8 +139,8 @@ const Transactions = () => {
                                         {/* Icon */}
                                         <div
                                             className={`w-12 h-12 rounded-full flex items-center justify-center ${isPositive(transaction)
-                                                    ? 'bg-emerald-500/10 text-emerald-400'
-                                                    : 'bg-orange-500/10 text-orange-400'
+                                                ? 'bg-emerald-500/10 text-emerald-400'
+                                                : 'bg-orange-500/10 text-orange-400'
                                                 }`}
                                         >
                                             {isPositive(transaction) ? <Plus size={20} /> : <Minus size={20} />}

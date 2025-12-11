@@ -26,7 +26,7 @@ const Events = () => {
             setLoading(true);
             const params = {
                 page,
-                limit: 6,
+                limit: 4,
                 published: true,
                 orderBy: 'startTime',
                 order: 'asc'
@@ -40,7 +40,7 @@ const Events = () => {
             const data = await listEvents(params);
             setEvents(data.results || data.events || []);
             const total = data.count || 0;
-            setTotalPages(Math.max(1, Math.ceil(total / 6)));
+            setTotalPages(Math.max(1, Math.ceil(total / 4)));
         } catch (err) {
             setError(err.message || 'Failed to load events');
         } finally {
