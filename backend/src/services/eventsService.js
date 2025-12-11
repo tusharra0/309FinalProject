@@ -106,7 +106,7 @@ const presentEventSummary = (event, userId = null) => ({
 });
 
 
-const presentEventDetail = (event, { showGuests = false } = {}) => {
+const presentEventDetail = (event, { showGuests = false, isGuest = false } = {}) => {
   const result = {
     id: event.id,
     name: event.name,
@@ -119,7 +119,8 @@ const presentEventDetail = (event, { showGuests = false } = {}) => {
     pointsRemain: event.pointsRemain,
     pointsAwarded: event.pointsAwarded,
     organizers: mapOrganizers(event),
-    numGuests: (event.guests || []).length
+    numGuests: (event.guests || []).length,
+    isGuest
   };
 
   if (showGuests) {
@@ -331,10 +332,10 @@ const listEvents = async ({ user, query }) => {
   const filtered = showFull
     ? baseEvents
     : baseEvents.filter((event) => {
-        if (event.capacity == null) return true;
-        const guestCount = (event.guests || []).length;
-        return guestCount < event.capacity;
-      });
+      if (event.capacity == null) return true;
+      const guestCount = (event.guests || []).length;
+      return guestCount < event.capacity;
+    });
 
   // Apply sorting
   const orderBy = query.orderBy || 'id';
@@ -387,7 +388,9 @@ const fetchEventForView = async ({ eventId, user }) => {
     throw createError(404, 'Event not found.');
   }
 
-  return presentEventDetail(event, { showGuests: privileged });
+  const userIsGuest = user ? isGuest(event, user.id) : false;
+
+  return presentEventDetail(event, { showGuests: privileged, isGuest: userIsGuest });
 };
 
 
@@ -398,12 +401,12 @@ const updateEvent = async ({ eventId, user, body }) => {
     throw createError(403, 'Permission denied.');
   }
 
-    const isManager = hasRole(user, 'manager', 'superuser');
-    if (!isManager && body.points !== undefined && body.points !== null) {
-      throw createError(403, 'Permission denied.');
-    }
+  const isManager = hasRole(user, 'manager', 'superuser');
+  if (!isManager && body.points !== undefined && body.points !== null) {
+    throw createError(403, 'Permission denied.');
+  }
 
-    if (!isManager && body.published !== undefined && body.published !== null) {
+  if (!isManager && body.published !== undefined && body.published !== null) {
     throw createError(403, 'Permission denied.');
   }
 
@@ -486,7 +489,7 @@ const updateEvent = async ({ eventId, user, body }) => {
   }
 
 
- if (body.capacity !== null && body.capacity !== undefined) {
+  if (body.capacity !== null && body.capacity !== undefined) {
     const nextCapacity = validatePositiveInt(body.capacity, 'Invalid event capacity.');
     const guestCount = (event.guests || []).length;
     if (guestCount > nextCapacity) {
@@ -666,9 +669,9 @@ const addGuest = async ({ eventId, utorid, user }) => {
   }
 
   const currentGuests = (event.guests || []).length;
-if (event.capacity != null && currentGuests >= event.capacity) {
-  throw createError(410, 'Event is at full capacity.');
-}
+  if (event.capacity != null && currentGuests >= event.capacity) {
+    throw createError(410, 'Event is at full capacity.');
+  }
 
   await prisma.eventGuest.create({
     data: {

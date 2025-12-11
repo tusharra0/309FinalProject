@@ -91,7 +91,7 @@ const EventDetails = () => {
         );
     }
 
-    const isFull = event.currentGuests >= event.maxGuests;
+    const isFull = event.capacity !== null && event.numGuests >= event.capacity;
     const canRSVP = !event.isGuest && !isFull;
 
     return (
@@ -109,7 +109,7 @@ const EventDetails = () => {
                     <div className="flex justify-between items-start mb-4">
                         <h1 className="text-3xl font-bold text-white">{event.name}</h1>
                         <div className="bg-indigo-500/10 text-indigo-400 px-4 py-2 rounded-full text-sm font-bold border border-indigo-500/20">
-                            +{event.pointsReward} Points
+                            +{event.pointsAwarded || 0} Points
                         </div>
                     </div>
                     <p className="text-slate-300 text-lg">{event.description}</p>
@@ -129,7 +129,7 @@ const EventDetails = () => {
                                 </div>
                                 <div>
                                     <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Date</div>
-                                    <div className="text-white font-semibold">{formatDate(event.eventDate)}</div>
+                                    <div className="text-white font-semibold">{formatDate(event.startTime)}</div>
                                 </div>
                             </div>
                         </div>
@@ -141,7 +141,7 @@ const EventDetails = () => {
                                 </div>
                                 <div>
                                     <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Time</div>
-                                    <div className="text-white font-semibold">{formatTime(event.eventDate)}</div>
+                                    <div className="text-white font-semibold">{formatTime(event.startTime)}</div>
                                 </div>
                             </div>
                         </div>
@@ -166,7 +166,7 @@ const EventDetails = () => {
                                 <div>
                                     <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Guests</div>
                                     <div className="text-white font-semibold">
-                                        {event.currentGuests || 0} / {event.maxGuests}
+                                        {event.numGuests || 0} / {event.capacity || '∞'}
                                     </div>
                                 </div>
                             </div>
