@@ -31,4 +31,8 @@ router.patch(
   transactionsController.processTransaction
 );
 
+// GET /transactions/stats
+// get cashier stats
+router.get('/stats', authRequired, transactionsController.getTransactionStats);
+
 module.exports = router;

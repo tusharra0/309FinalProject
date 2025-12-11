@@ -316,10 +316,10 @@ const listTransactions = async (params = {}) => {
     prisma.transaction.findMany({
       where,
       include: transactionInclude,
-      orderBy: (function(){
+      orderBy: (function () {
         const field = params.orderBy || 'id';
         const dir = params.order === 'asc' ? 'asc' : 'desc';
-        const allowed = ['id','createdAt','pointsDelta','type'];
+        const allowed = ['id', 'createdAt', 'pointsDelta', 'type'];
         if (allowed.includes(field)) {
           const obj = {};
           obj[field] = dir;
@@ -598,5 +598,38 @@ module.exports = {
   createTransfer,
   createRedemptionRequest,
   listUserTransactions,
-  createError
+  createError,
+  getCashierStats: async (userId) => {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const [sales, redemptions] = await Promise.all([
+      prisma.transaction.aggregate({
+        where: {
+          createdById: userId,
+          type: TransactionType.purchase,
+          createdAt: {
+            gte: startOfDay
+          }
+        },
+        _sum: {
+          spent: true
+        }
+      }),
+      prisma.transaction.count({
+        where: {
+          processedById: userId,
+          type: TransactionType.redemption,
+          processedAt: {
+            gte: startOfDay
+          }
+        }
+      })
+    ]);
+
+    return {
+      sales: sales._sum.spent || 0,
+      redemptions
+    };
+  }
 };

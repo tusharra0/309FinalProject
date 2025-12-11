@@ -26,6 +26,7 @@ import UserTransactions from './pages/user/Transactions';
 import CashierDashboard from './pages/cashier/CashierDashboard';
 import Purchase from './pages/cashier/Purchase';
 import RedemptionsProcess from './pages/cashier/RedemptionsProcess';
+import RegisterCustomer from './pages/cashier/RegisterCustomer';
 
 // Manager Pages
 import ManagerDashboard from './pages/manager/ManagerDashboard';
@@ -81,6 +82,7 @@ const App = () => (
           <Route path="dashboard" element={<CashierDashboard />} />
           <Route path="purchase" element={<Purchase />} />
           <Route path="redemptions/process" element={<RedemptionsProcess />} />
+          <Route path="register-customer" element={<RegisterCustomer />} />
         </Route>
 
         {/* Manager Routes */}

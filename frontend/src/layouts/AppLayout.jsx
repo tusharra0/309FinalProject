@@ -15,7 +15,8 @@ import {
     CreditCard,
     Users,
     Tag,
-    Shield
+    Shield,
+    UserPlus
 } from 'lucide-react';
 
 import logo from '../assets/logo-v2.png';
@@ -58,6 +59,7 @@ const AppLayout = () => {
             case 'cashier':
                 return [
                     { to: '/cashier/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                    { to: '/cashier/register-customer', label: 'Register Customer', icon: UserPlus },
                     { to: '/cashier/purchase', label: 'Purchase', icon: CreditCard },
                     { to: '/cashier/redemptions/process', label: 'Process Redemption', icon: Gift },
                 ];

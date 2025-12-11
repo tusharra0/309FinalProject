@@ -49,3 +49,8 @@ export const markTransactionSuspicious = (id, suspicious) =>
  */
 export const processRedemption = (id) =>
     patch(`/transactions/${id}/processed`, { processed: true });
+
+/**
+ * Get cashier dashboard stats (today's sales, redemptions)
+ */
+export const getTransactionStats = () => get('/transactions/stats');

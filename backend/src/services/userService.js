@@ -13,7 +13,7 @@ const createUser = async ({ utorid, name, email, password, role, verified }) => 
 
   // Generate reset token and expiration for new users
   data.resetToken = uuidv4();
-  data.expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+  data.resetExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
 
   return prisma.user.create({
     data,
@@ -24,7 +24,7 @@ const createUser = async ({ utorid, name, email, password, role, verified }) => 
       email: true,
       verified: true,
       resetToken: true,
-      expiresAt: true
+      resetExpiresAt: true
     }
   });
 };
@@ -92,7 +92,7 @@ const fetchUsers = async ({ name, role, verified, activated, page = 1, limit = 1
 };
 
 
-  module.exports = {
-    createUser,
-    fetchUsers
-  };
+module.exports = {
+  createUser,
+  fetchUsers
+};

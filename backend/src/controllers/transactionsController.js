@@ -9,10 +9,10 @@ const formatTransaction = (transaction) => {
   const userInfo = transaction.user
     ? { utorid: transaction.user.utorid ?? null, email: transaction.user.email ?? null }
     : transaction.sender
-    ? { utorid: transaction.sender.utorid ?? null, email: transaction.sender.email ?? null }
-    : transaction.recipient
-    ? { utorid: transaction.recipient.utorid ?? null, email: transaction.recipient.email ?? null }
-    : null;
+      ? { utorid: transaction.sender.utorid ?? null, email: transaction.sender.email ?? null }
+      : transaction.recipient
+        ? { utorid: transaction.recipient.utorid ?? null, email: transaction.recipient.email ?? null }
+        : null;
 
   switch (transaction.type) {
     case 'purchase':
@@ -372,7 +372,7 @@ exports.getMyTransactions = async (req, res) => {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-    try {
+  try {
     // Forward all query parameters to the service so filters like `type` and
     // other supported query params can be applied for user-specific lists.
     const { count, records } = await transactionsService.listUserTransactions({
@@ -394,4 +394,17 @@ exports.getMyTransactions = async (req, res) => {
     console.error(err);
     return res.status(500).json({ message: 'Failed to fetch transactions' });
   }
+}
+
+
+exports.getTransactionStats = async (req, res) => {
+  if (!['cashier', 'manager', 'superuser'].includes(req.user?.role)) {
+    return permissionError(res);
+  }
+
+  const userId = req.user.id;
+
+  return handleServiceAction(res, async () => {
+    return await transactionsService.getCashierStats(userId);
+  });
 };
