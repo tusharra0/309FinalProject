@@ -43,6 +43,7 @@ import ManagerEventForm from './pages/manager/EventForm';
 import OrganizerDashboard from './pages/organizer/OrganizerDashboard';
 import OrganizerEvents from './pages/organizer/Events';
 import OrganizerEventDetails from './pages/organizer/EventDetails';
+import EventManagement from './pages/organizer/EventManagement';
 
 // Superuser Pages
 import SuperuserDashboard from './pages/superuser/SuperuserDashboard';
@@ -83,6 +84,10 @@ const App = () => (
           <Route path="purchase" element={<Purchase />} />
           <Route path="redemptions/process" element={<RedemptionsProcess />} />
           <Route path="register-customer" element={<RegisterCustomer />} />
+          <Route path="events" element={<OrganizerEvents basePath="/cashier" />} />
+          <Route path="events/new" element={<ManagerEventForm basePath="/cashier" />} />
+          <Route path="events/:eventId" element={<EventManagement basePath="/cashier" />} />
+          <Route path="events/:eventId/edit" element={<ManagerEventForm basePath="/cashier" />} />
         </Route>
 
         {/* Manager Routes */}

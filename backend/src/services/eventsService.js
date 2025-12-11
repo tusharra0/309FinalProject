@@ -219,7 +219,9 @@ const decrementGuests = async (eventId, userId) => {
 };
 
 const createEvent = async ({ body, user }) => {
-  ensureManager(user);
+  if (!hasRole(user, 'manager', 'superuser', 'cashier')) {
+    throw createError(403, 'Permission denied.');
+  }
 
   const name = body.name;
   if (!name) {
@@ -256,6 +258,14 @@ const createEvent = async ({ body, user }) => {
       createdBy: {
         connect: { id: user.id }
       }
+    }
+  });
+
+  // Automatically add the creator as an organizer
+  await prisma.eventOrganizer.create({
+    data: {
+      eventId: created.id,
+      userId: user.id
     }
   });
 
@@ -301,7 +311,22 @@ const listEvents = async ({ user, query }) => {
     where.endTime = isEnded ? { lte: new Date() } : { gt: new Date() };
   }
 
-  if (hasRole(user, 'regular', 'cashier')) {
+  if (query.organizerId) {
+    const orgId = Number(query.organizerId);
+    if (Number.isInteger(orgId)) {
+      where.organizers = {
+        some: { userId: orgId }
+      };
+    }
+  }
+
+  if (hasRole(user, 'cashier')) {
+    // Cashiers see published events OR events they organize (including drafts)
+    where.OR = [
+      { published: true },
+      { organizers: { some: { userId: user.id } } }
+    ];
+  } else if (hasRole(user, 'regular')) {
     where.published = true;
   } else if (query.published !== undefined) {
     where.published = query.published === 'true';
@@ -402,12 +427,16 @@ const updateEvent = async ({ eventId, user, body }) => {
   }
 
   const isManager = hasRole(user, 'manager', 'superuser');
-  if (!isManager && body.points !== undefined && body.points !== null) {
-    throw createError(403, 'Permission denied.');
-  }
+  const isOrganizerUser = isOrganizer(event, user.id);
 
-  if (!isManager && body.published !== undefined && body.published !== null) {
-    throw createError(403, 'Permission denied.');
+  // Allow organizers to update points and published status
+  if (!isManager && !isOrganizerUser) {
+    if (body.points !== undefined && body.points !== null) {
+      throw createError(403, 'Permission denied.');
+    }
+    if (body.published !== undefined && body.published !== null) {
+      throw createError(403, 'Permission denied.');
+    }
   }
 
   const started = eventHasStarted(event);

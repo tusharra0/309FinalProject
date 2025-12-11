@@ -6,7 +6,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
 import SuccessMessage from '../../components/SuccessMessage';
 
-const EventManagement = () => {
+const EventManagement = ({ basePath = '/organizer' }) => {
     const { eventId } = useParams();
     const navigate = useNavigate();
     const [event, setEvent] = useState(null);
@@ -19,6 +19,18 @@ const EventManagement = () => {
     const [selectedGuest, setSelectedGuest] = useState(null);
 
     useEffect(() => {
+        const fetchEvent = async () => {
+            try {
+                setLoading(true);
+                const data = await getEvent(eventId);
+                setEvent(data);
+            } catch (err) {
+                setError(err.message || 'Failed to load event');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchEvent();
     }, [eventId]);
 
@@ -48,7 +60,7 @@ const EventManagement = () => {
     };
 
     const handleRemoveGuest = async (userId) => {
-        if (!confirm('Remove this guest?')) return;
+        if (!window.confirm('Remove this guest?')) return;
         try {
             setError('');
             await removeGuest(eventId, userId);
@@ -101,7 +113,7 @@ const EventManagement = () => {
     return (
         <div className="max-w-4xl mx-auto">
             <button
-                onClick={() => navigate('/organizer/events')}
+                onClick={() => navigate(`${basePath}/events`)}
                 className="text-indigo-400 hover:text-indigo-300 mb-4 flex items-center gap-2"
             >
                 <ArrowLeft size={18} />

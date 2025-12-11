@@ -17,11 +17,7 @@ const Events = () => {
     const [hoveredEvent, setHoveredEvent] = useState(null);
     const [cancellingEvent, setCancellingEvent] = useState(null);
 
-    useEffect(() => {
-        fetchEvents();
-    }, [page, filter]);
-
-    const fetchEvents = async () => {
+    const fetchEvents = React.useCallback(async () => {
         try {
             setLoading(true);
             const params = {
@@ -46,7 +42,11 @@ const Events = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, filter]);
+
+    useEffect(() => {
+        fetchEvents();
+    }, [fetchEvents]);
 
     const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString('en-US', {

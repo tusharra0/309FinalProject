@@ -6,7 +6,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
 import SuccessMessage from '../../components/SuccessMessage';
 
-const EventForm = () => {
+const EventForm = ({ basePath = '/manager' }) => {
     const { eventId } = useParams();
     const navigate = useNavigate();
     const isEdit = Boolean(eventId);
@@ -94,7 +94,7 @@ const EventForm = () => {
             } else {
                 await createEvent(data);
                 setSuccess('Event created successfully!');
-                setTimeout(() => navigate('/manager/events'), 1500);
+                setTimeout(() => navigate(`${basePath}/events`), 1500);
             }
         } catch (err) {
             setError(err.message || 'Failed to save event');
@@ -109,7 +109,7 @@ const EventForm = () => {
         try {
             setError('');
             await deleteEvent(eventId);
-            navigate('/manager/events');
+            navigate(`${basePath}/events`);
         } catch (err) {
             setError(err.message || 'Failed to delete event');
         }
@@ -152,7 +152,7 @@ const EventForm = () => {
     return (
         <div className="max-w-4xl mx-auto">
             <button
-                onClick={() => navigate('/manager/events')}
+                onClick={() => navigate(`${basePath}/events`)}
                 className="text-indigo-400 hover:text-indigo-300 mb-4 flex items-center gap-2"
             >
                 <ArrowLeft size={18} />
