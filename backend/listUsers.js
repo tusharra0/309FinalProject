@@ -5,7 +5,7 @@ const { PrismaClient } = require('@prisma/client');
   try {
     const users = await prisma.user.findMany({ select: { id: true, utorid: true, email: true, role: true } });
     console.log('\n--- USERS ---');
-    console.log(JSON.stringify(users, null, 2));
+    users.forEach(u => console.log(`${u.utorid} (${u.role}) verified:${u.verified}`));
   } catch (e) {
     console.error('Error fetching users:', e);
     process.exit(1);

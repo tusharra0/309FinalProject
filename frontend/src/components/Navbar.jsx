@@ -4,7 +4,7 @@ import { User, ChevronDown, LayoutDashboard, LogOut } from 'lucide-react';
 import useUserStore from '../store/userStore';
 import { redirectPathForRole } from '../utils/auth';
 
-import logo from '../assets/logo.png';
+import logo from '../assets/logo-v2.png';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout, getRole } = useUserStore();

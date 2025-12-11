@@ -95,7 +95,7 @@ const Transfer = () => {
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                         Recipient User ID or UTORid
                     </label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                         <input
                             type="text"
                             value={recipientId}
