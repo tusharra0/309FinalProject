@@ -85,9 +85,7 @@ const App = () => (
           <Route path="redemptions/process" element={<RedemptionsProcess />} />
           <Route path="register-customer" element={<RegisterCustomer />} />
           <Route path="events" element={<OrganizerEvents basePath="/cashier" />} />
-          <Route path="events/new" element={<ManagerEventForm basePath="/cashier" />} />
           <Route path="events/:eventId" element={<EventManagement basePath="/cashier" />} />
-          <Route path="events/:eventId/edit" element={<ManagerEventForm basePath="/cashier" />} />
         </Route>
 
         {/* Manager Routes */}
@@ -103,6 +101,7 @@ const App = () => (
           <Route path="events" element={<ManagerEvents />} />
           <Route path="events/new" element={<ManagerEventForm />} />
           <Route path="events/:eventId" element={<ManagerEventForm />} />
+          <Route path="events/:eventId/manage" element={<EventManagement basePath="/manager" />} />
         </Route>
 
         {/* Organizer Routes */}

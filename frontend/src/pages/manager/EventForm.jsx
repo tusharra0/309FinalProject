@@ -94,7 +94,7 @@ const EventForm = ({ basePath = '/manager' }) => {
             } else {
                 await createEvent(data);
                 setSuccess('Event created successfully!');
-                setTimeout(() => navigate(`${basePath}/events`), 1500);
+                setTimeout(() => navigate('/manager/events'), 1500);
             }
         } catch (err) {
             setError(err.message || 'Failed to save event');
@@ -109,7 +109,7 @@ const EventForm = ({ basePath = '/manager' }) => {
         try {
             setError('');
             await deleteEvent(eventId);
-            navigate(`${basePath}/events`);
+            navigate('/manager/events');
         } catch (err) {
             setError(err.message || 'Failed to delete event');
         }
@@ -168,7 +168,15 @@ const EventForm = ({ basePath = '/manager' }) => {
                         {isEdit ? 'Update event details and manage organizers' : 'Set up a new campus event'}
                     </p>
                 </div>
-                {isEdit && (
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={() => navigate(`${basePath}/events/${eventId}/manage`)}
+                        className="px-5 py-2.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded-xl font-semibold transition-all border border-indigo-500/20 flex items-center gap-2 group backdrop-blur-sm"
+                    >
+                        <Users size={18} className="group-hover:scale-110 transition-transform" />
+                        Manage Guests
+                    </button>
                     <button
                         type="button"
                         onClick={handleDelete}
@@ -177,7 +185,7 @@ const EventForm = ({ basePath = '/manager' }) => {
                         <Trash2 size={18} className="group-hover:scale-110 transition-transform" />
                         Delete Event
                     </button>
-                )}
+                </div>
             </div>
 
             <ErrorMessage message={error} onClose={() => setError('')} className="mb-6 transform hover:scale-[1.01] transition-transform" />
