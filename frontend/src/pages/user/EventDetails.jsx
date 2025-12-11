@@ -15,11 +15,7 @@ const EventDetails = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    useEffect(() => {
-        fetchEvent();
-    }, [eventId]);
-
-    const fetchEvent = async () => {
+    const fetchEvent = React.useCallback(async () => {
         try {
             setLoading(true);
             const data = await getEvent(eventId);
@@ -29,7 +25,11 @@ const EventDetails = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [eventId]);
+
+    useEffect(() => {
+        fetchEvent();
+    }, [fetchEvent]);
 
     const handleRSVP = async () => {
         try {

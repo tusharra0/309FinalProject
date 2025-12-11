@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Gift, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Gift, Plus, Trash2, Edit } from 'lucide-react';
 import { getEvent, addGuest, removeGuest, awardPoints } from '../../api/events';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
 import SuccessMessage from '../../components/SuccessMessage';
 
-const EventManagement = () => {
+const EventManagement = ({ basePath = '/organizer' }) => {
     const { eventId } = useParams();
     const navigate = useNavigate();
     const [event, setEvent] = useState(null);
@@ -18,21 +18,21 @@ const EventManagement = () => {
     const [awardDescription, setAwardDescription] = useState('');
     const [selectedGuest, setSelectedGuest] = useState(null);
 
-    useEffect(() => {
-        fetchEvent();
-    }, [eventId]);
-
-    const fetchEvent = async () => {
+    const fetchEvent = async (showLoading = true) => {
         try {
-            setLoading(true);
+            if (showLoading) setLoading(true);
             const data = await getEvent(eventId);
             setEvent(data);
         } catch (err) {
             setError(err.message || 'Failed to load event');
         } finally {
-            setLoading(false);
+            if (showLoading) setLoading(false);
         }
     };
+
+    useEffect(() => {
+        fetchEvent();
+    }, [eventId]);
 
     const handleAddGuest = async (e) => {
         e.preventDefault();
@@ -41,19 +41,19 @@ const EventManagement = () => {
             await addGuest(eventId, newGuestId);
             setSuccess(`Guest added successfully`);
             setNewGuestId('');
-            fetchEvent();
+            fetchEvent(false);
         } catch (err) {
             setError(err.message || 'Failed to add guest');
         }
     };
 
     const handleRemoveGuest = async (userId) => {
-        if (!confirm('Remove this guest?')) return;
+        if (!window.confirm('Remove this guest?')) return;
         try {
             setError('');
             await removeGuest(eventId, userId);
             setSuccess('Guest removed');
-            fetchEvent();
+            fetchEvent(false);
         } catch (err) {
             setError(err.message || 'Failed to remove guest');
         }
@@ -66,14 +66,17 @@ const EventManagement = () => {
             const points = parseInt(pointsToAward);
 
             const payload = {
-                pointChange: points,
-                description: awardDescription || `Event attendance: ${event.name}`
+                type: 'event',
+                amount: points,
+                remark: awardDescription || `Event attendance: ${event.name}`
             };
 
             if (selectedGuest) {
-                payload.userId = selectedGuest;
-            } else {
-                payload.allGuests = true;
+                // Find guest by ID to get utorid
+                const guestObj = event.guests.find(g => g.id === parseInt(selectedGuest));
+                if (guestObj) {
+                    payload.utorid = guestObj.utorid;
+                }
             }
 
             await awardPoints(eventId, payload);
@@ -101,14 +104,23 @@ const EventManagement = () => {
     return (
         <div className="max-w-4xl mx-auto">
             <button
-                onClick={() => navigate('/organizer/events')}
+                onClick={() => navigate(`${basePath}/events`)}
                 className="text-indigo-400 hover:text-indigo-300 mb-4 flex items-center gap-2"
             >
                 <ArrowLeft size={18} />
                 Back to My Events
             </button>
 
-            <h1 className="text-3xl font-bold text-white mb-2">{event.name}</h1>
+            <div className="flex justify-between items-start mb-2">
+                <h1 className="text-3xl font-bold text-white">{event.name}</h1>
+                <button
+                    onClick={() => navigate(`${basePath}/events/${eventId}/edit`)}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                >
+                    <Edit size={16} />
+                    Edit Event
+                </button>
+            </div>
             <p className="text-slate-400 mb-8">Manage guests and award points</p>
 
             <ErrorMessage message={error} onClose={() => setError('')} className="mb-4" />
@@ -118,7 +130,7 @@ const EventManagement = () => {
                 {/* Guest List */}
                 <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6">
                     <h3 className="text-lg font-semibold text-white mb-4">
-                        Guest List ({event.guests?.length || 0}/{event.maxGuests})
+                        Guest List ({event.guests?.length || 0}/{event.capacity || '∞'})
                     </h3>
 
                     {/* Add Guest Form */}

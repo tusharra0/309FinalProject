@@ -7,7 +7,7 @@ import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
 import Pagination from '../../components/Pagination';
 
-const Events = () => {
+const Events = ({ basePath = '/organizer' }) => {
     const { user } = useUserStore();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -16,27 +16,29 @@ const Events = () => {
     const [totalPages, setTotalPages] = useState(1);
 
     useEffect(() => {
-        fetchEvents();
-    }, [page]);
+        const fetchEvents = async () => {
+            try {
+                setLoading(true);
+                const data = await listEvents({
+                    page,
+                    limit: 10,
+                    organizerId: user?.id,
+                    orderBy: 'eventDate',
+                    order: 'desc'
+                });
+                // Backend returns { count, results }
+                setEvents(data.results || []);
+                const count = data.count || 0;
+                setTotalPages(Math.ceil(count / 10) || 1);
+            } catch (err) {
+                setError(err.message || 'Failed to load events');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const fetchEvents = async () => {
-        try {
-            setLoading(true);
-            const data = await listEvents({
-                page,
-                limit: 10,
-                organizerId: user?.id,
-                orderBy: 'eventDate',
-                order: 'desc'
-            });
-            setEvents(data.events || []);
-            setTotalPages(data.pagination?.totalPages || 1);
-        } catch (err) {
-            setError(err.message || 'Failed to load events');
-        } finally {
-            setLoading(false);
-        }
-    };
+        fetchEvents();
+    }, [page, user]);
 
     if (loading && events.length === 0) {
         return (
@@ -54,7 +56,7 @@ const Events = () => {
                     <p className="text-slate-400">Events you're organizing</p>
                 </div>
                 <Link
-                    to="/organizer/events/new"
+                    to={`${basePath}/events/new`}
                     className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold transition-colors flex items-center gap-2"
                 >
                     <Plus size={20} />
@@ -69,7 +71,7 @@ const Events = () => {
                     <Calendar size={48} className="mx-auto text-slate-600 mb-4" />
                     <p className="text-slate-400 mb-4">No events yet</p>
                     <Link
-                        to="/organizer/events/new"
+                        to={`${basePath}/events/new`}
                         className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors"
                     >
                         Create Your First Event
@@ -81,7 +83,7 @@ const Events = () => {
                         {events.map((event) => (
                             <Link
                                 key={event.id}
-                                to={`/organizer/events/${event.id}`}
+                                to={`${basePath}/events/${event.id}`}
                                 className="bg-slate-900 rounded-2xl p-6 border border-slate-800 hover:border-indigo-500/50 transition-colors"
                             >
                                 <div className="flex justify-between items-start mb-4">
@@ -93,16 +95,16 @@ const Events = () => {
                                                 📍 {event.location}
                                             </span>
                                             <span className="text-slate-400">
-                                                📅 {new Date(event.eventDate).toLocaleDateString()}
+                                                📅 {new Date(event.startTime).toLocaleDateString()}
                                             </span>
                                             <span className="text-slate-400">
-                                                👥 {event.currentGuests || 0}/{event.maxGuests}
+                                                👥 {event.numGuests || 0}/{event.capacity || '∞'}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-end gap-2">
                                         <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full text-sm font-semibold">
-                                            +{event.pointsReward} pts
+                                            {event.pointsRemain} pts left
                                         </span>
                                         {event.published ? (
                                             <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-full text-xs font-semibold">

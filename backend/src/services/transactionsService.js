@@ -557,7 +557,8 @@ const listUserTransactions = async ({ userId, page = 1, limit = 10, ...rest } = 
     OR: [
       { userId },
       { senderId: userId },
-      { recipientId: userId }
+      { recipientId: userId },
+      { createdById: userId }
     ]
   };
 

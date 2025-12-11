@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserPlus, Mail, User, BookOpen, Key, ArrowLeft, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
+import { UserPlus, Mail, User, Key, ArrowLeft, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 import { createUser } from '../../api/users';
 import LoadingSpinner from '../../components/LoadingSpinner';
 

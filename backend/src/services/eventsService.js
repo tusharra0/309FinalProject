@@ -219,7 +219,9 @@ const decrementGuests = async (eventId, userId) => {
 };
 
 const createEvent = async ({ body, user }) => {
-  ensureManager(user);
+  if (!hasRole(user, 'manager', 'superuser', 'cashier')) {
+    throw createError(403, 'Permission denied.');
+  }
 
   const name = body.name;
   if (!name) {
@@ -256,6 +258,14 @@ const createEvent = async ({ body, user }) => {
       createdBy: {
         connect: { id: user.id }
       }
+    }
+  });
+
+  // Automatically add the creator as an organizer
+  await prisma.eventOrganizer.create({
+    data: {
+      eventId: created.id,
+      userId: user.id
     }
   });
 
@@ -301,7 +311,22 @@ const listEvents = async ({ user, query }) => {
     where.endTime = isEnded ? { lte: new Date() } : { gt: new Date() };
   }
 
-  if (hasRole(user, 'regular', 'cashier')) {
+  if (query.organizerId) {
+    const orgId = Number(query.organizerId);
+    if (Number.isInteger(orgId)) {
+      where.organizers = {
+        some: { userId: orgId }
+      };
+    }
+  }
+
+  if (hasRole(user, 'cashier')) {
+    // Cashiers see published events OR events they organize (including drafts)
+    where.OR = [
+      { published: true },
+      { organizers: { some: { userId: user.id } } }
+    ];
+  } else if (hasRole(user, 'regular')) {
     where.published = true;
   } else if (query.published !== undefined) {
     where.published = query.published === 'true';
@@ -397,17 +422,21 @@ const fetchEventForView = async ({ eventId, user }) => {
 const updateEvent = async ({ eventId, user, body }) => {
   const event = await fetchEvent(eventId);
 
-  if (!hasRole(user, 'manager', 'superuser') && !isOrganizer(event, user.id)) {
+  if (!hasRole(user, 'manager', 'superuser') && !isOrganizer(event, Number(user.id))) {
     throw createError(403, 'Permission denied.');
   }
 
   const isManager = hasRole(user, 'manager', 'superuser');
-  if (!isManager && body.points !== undefined && body.points !== null) {
-    throw createError(403, 'Permission denied.');
-  }
+  const isOrganizerUser = isOrganizer(event, Number(user.id));
 
-  if (!isManager && body.published !== undefined && body.published !== null) {
-    throw createError(403, 'Permission denied.');
+  // Allow organizers to update points and published status
+  if (!isManager && !isOrganizerUser) {
+    if (body.points !== undefined && body.points !== null) {
+      throw createError(403, 'Permission denied.');
+    }
+    if (body.published !== undefined && body.published !== null) {
+      throw createError(403, 'Permission denied.');
+    }
   }
 
   const started = eventHasStarted(event);
@@ -448,20 +477,7 @@ const updateEvent = async ({ eventId, user, body }) => {
   if (body.description) data.description = body.description;
   if (body.location) data.location = body.location;
 
-  if (body.startTime) {
-    const nextStart = isoDate(body.startTime);
-    if (eventHasStarted(event)) {
-      throw createError(400, 'Invalid event time.');
-    }
-    validateEventTimes(nextStart, event.endTime);
-    data.startTime = nextStart;
-  }
 
-  if (body.endTime) {
-    const nextEnd = isoDate(body.endTime);
-    validateEventTimes(event.startTime, nextEnd);
-    data.endTime = nextEnd;
-  }
 
   let newStart = event.startTime;
   let newEnd = event.endTime;
@@ -499,8 +515,10 @@ const updateEvent = async ({ eventId, user, body }) => {
   }
 
   if (body.points !== null && body.points !== undefined) {
+    console.log('DEBUG update points:', body.points, typeof body.points, 'awarded:', event.pointsAwarded);
     const nextPoints = validatePositiveInt(body.points, 'Invalid event points.');
     if (nextPoints < event.pointsAwarded) {
+      console.log('FAIL: nextPoints < event.pointsAwarded', nextPoints, event.pointsAwarded);
       throw createError(400, 'Invalid event points.');
     }
     data.pointsTotal = nextPoints;
@@ -823,7 +841,7 @@ const awardEventPoints = async ({ eventId, user, body }) => {
   }
 
   const recipientUtorid = body.utorid;
-  const guests = event.guests || [];
+  const guests = (event.guests || []).filter(g => !g.removedAt);
   const recipients = [];
 
   if (recipientUtorid) {

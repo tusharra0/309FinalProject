@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { UserPlus, ShoppingCart, Award } from 'lucide-react';
+import { UserPlus, ShoppingCart, Award, Calendar } from 'lucide-react';
 
 const CashierDashboard = () => {
     const [stats, setStats] = React.useState({ sales: 0, redemptions: 0 });
@@ -76,6 +76,17 @@ const CashierDashboard = () => {
                         </div>
                         <h3 className="text-lg font-bold text-white mb-2">Process Redemption</h3>
                         <p className="text-slate-400 text-sm">Verify and process customer point redemptions.</p>
+                    </Link>
+
+                    <Link
+                        to="/cashier/events"
+                        className="bg-slate-900 p-6 rounded-xl border border-slate-800 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10 transition-all group"
+                    >
+                        <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-400 mb-4 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                            <Calendar size={24} />
+                        </div>
+                        <h3 className="text-lg font-bold text-white mb-2">Manage Events</h3>
+                        <p className="text-slate-400 text-sm">Create and manage events, guests, and point rewards.</p>
                     </Link>
                 </div>
             </div>

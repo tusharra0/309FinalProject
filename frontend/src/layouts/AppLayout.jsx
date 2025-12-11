@@ -62,6 +62,7 @@ const AppLayout = () => {
                     { to: '/cashier/register-customer', label: 'Register Customer', icon: UserPlus },
                     { to: '/cashier/purchase', label: 'Purchase', icon: CreditCard },
                     { to: '/cashier/redemptions/process', label: 'Process Redemption', icon: Gift },
+                    { to: '/cashier/events', label: 'Manage Events', icon: Calendar },
                     // Regular User Views
                     { to: '/user/dashboard', label: 'My Dashboard', icon: User },
                     { to: '/user/my-qr', label: 'My QR', icon: QrCode },

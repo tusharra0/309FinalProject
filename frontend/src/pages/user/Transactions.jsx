@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Minus, Filter, Download } from 'lucide-react';
+import { Plus, Minus, Filter } from 'lucide-react';
 import { getMyTransactions } from '../../api/transactions';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
@@ -18,27 +18,27 @@ const Transactions = () => {
     });
 
     useEffect(() => {
+        const fetchTransactions = async () => {
+            try {
+                setLoading(true);
+                const data = await getMyTransactions({
+                    page,
+                    limit: 5,
+                    ...filters
+                });
+                const results = data.results || data.transactions || [];
+                setTransactions(results);
+                const count = data.count ?? results.length;
+                setTotalPages(Math.max(1, Math.ceil((count || 0) / 5)));
+            } catch (err) {
+                setError(err.message || 'Failed to load transactions');
+            } finally {
+                setLoading(false);
+            }
+        };
+
         fetchTransactions();
     }, [page, filters]);
-
-    const fetchTransactions = async () => {
-        try {
-            setLoading(true);
-            const data = await getMyTransactions({
-                page,
-                limit: 5,
-                ...filters
-            });
-            const results = data.results || data.transactions || [];
-            setTransactions(results);
-            const count = data.count ?? results.length;
-            setTotalPages(Math.max(1, Math.ceil((count || 0) / 5)));
-        } catch (err) {
-            setError(err.message || 'Failed to load transactions');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const getTransactionColor = (type) => {
         const colors = {
