@@ -18,7 +18,7 @@ import {
     Shield
 } from 'lucide-react';
 
-import logo from '../assets/logo.png';
+import logo from '../assets/logo-v2.png';
 
 const AppLayout = () => {
     const { token, role, logout } = useAuth();
@@ -104,10 +104,7 @@ const AppLayout = () => {
                 {/* Logo Section */}
                 <div className="p-4 flex flex-col items-center border-b border-slate-800 shrink-0">
                     <Link to="/" className="flex flex-col items-center gap-2">
-                        <img src={logo} alt="Logo" className="h-12 w-auto object-contain drop-shadow-lg" />
-                        <span className="px-2 py-0.5 bg-slate-800 text-slate-300 text-[10px] font-bold rounded-full uppercase tracking-widest border border-slate-700">
-                            {role}
-                        </span>
+                        <img src={logo} alt="Logo" className="h-32 w-auto object-contain drop-shadow-lg" />
                     </Link>
                 </div>
 
