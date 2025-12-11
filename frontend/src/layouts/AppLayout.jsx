@@ -62,6 +62,15 @@ const AppLayout = () => {
                     { to: '/cashier/register-customer', label: 'Register Customer', icon: UserPlus },
                     { to: '/cashier/purchase', label: 'Purchase', icon: CreditCard },
                     { to: '/cashier/redemptions/process', label: 'Process Redemption', icon: Gift },
+                    // Regular User Views
+                    { to: '/user/dashboard', label: 'My Dashboard', icon: User },
+                    { to: '/user/my-qr', label: 'My QR', icon: QrCode },
+                    { to: '/user/transfer', label: 'Transfer Points', icon: ArrowRightLeft },
+                    { to: '/user/redeem', label: 'Redeem', icon: Gift },
+                    { to: '/user/redemption-qr', label: 'Redemption QR', icon: QrCode },
+                    { to: '/user/promotions', label: 'Promotions', icon: Tag },
+                    { to: '/user/events', label: 'Events', icon: Calendar },
+                    { to: '/user/transactions', label: 'My Transactions', icon: CreditCard },
                 ];
             case 'manager':
                 return [
