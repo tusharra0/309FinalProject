@@ -56,12 +56,14 @@ try {
     const transactionsRoutes = require('./src/routes/transactionsRoutes');
     const eventsRoutes = require('./src/routes/eventsRoutes');
     const promotionsRoutes = require('./src/routes/promotionsRoutes');
+    const managerRoutes = require('./src/routes/managerRoutes');
 
     app.use('/auth', authRoutes);
     app.use('/users', userRoutes);
     app.use('/transactions', transactionsRoutes);
     app.use('/events', eventsRoutes);
     app.use('/promotions', promotionsRoutes);
+    app.use('/manager', managerRoutes);
 
     // Health check endpoint
     app.get('/health', (req, res) => {

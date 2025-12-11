@@ -63,13 +63,7 @@ const Events = () => {
         });
     };
 
-    if (loading && events.length === 0) {
-        return (
-            <div className="flex items-center justify-center h-64">
-                <LoadingSpinner />
-            </div>
-        );
-    }
+
 
     return (
         <div className="space-y-8">
@@ -82,8 +76,8 @@ const Events = () => {
                     <button
                         onClick={() => setFilter('all')}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${filter === 'all'
-                                ? 'bg-slate-700 text-white shadow-sm'
-                                : 'text-slate-400 hover:text-white'
+                            ? 'bg-slate-700 text-white shadow-sm'
+                            : 'text-slate-400 hover:text-white'
                             }`}
                     >
                         All
@@ -91,8 +85,8 @@ const Events = () => {
                     <button
                         onClick={() => setFilter('joined')}
                         className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${filter === 'joined'
-                                ? 'bg-slate-700 text-white shadow-sm'
-                                : 'text-slate-400 hover:text-white'
+                            ? 'bg-slate-700 text-white shadow-sm'
+                            : 'text-slate-400 hover:text-white'
                             }`}
                     >
                         Joined
@@ -102,7 +96,11 @@ const Events = () => {
 
             <ErrorMessage message={error} onClose={() => setError('')} />
 
-            {events.length === 0 ? (
+            {loading && events.length === 0 ? (
+                <div className="flex items-center justify-center h-64">
+                    <LoadingSpinner />
+                </div>
+            ) : events.length === 0 ? (
                 <div className="bg-slate-900 rounded-2xl border border-slate-800 p-12 text-center">
                     <p className="text-slate-400">No events available</p>
                 </div>
@@ -113,11 +111,10 @@ const Events = () => {
                             <Link
                                 key={event.id}
                                 to={`/user/events/${event.id}`}
-                                className={`relative bg-slate-900 rounded-2xl p-6 shadow-sm border-l-4 border-y border-r transition-colors ${
-                                    event.isGuest
-                                        ? 'border-l-emerald-500 border-emerald-500/30 hover:border-emerald-400'
-                                        : 'border-l-indigo-500 border-slate-800 hover:border-indigo-400'
-                                }`}
+                                className={`relative bg-slate-900 rounded-2xl p-6 shadow-sm border-l-4 border-y border-r transition-colors ${event.isGuest
+                                    ? 'border-l-emerald-500 border-emerald-500/30 hover:border-emerald-400'
+                                    : 'border-l-indigo-500 border-slate-800 hover:border-indigo-400'
+                                    }`}
                             >
                                 {/* RSVP Badge Overlay */}
                                 {event.isGuest && (
