@@ -116,13 +116,7 @@ const Events = () => {
                                     : 'border-l-indigo-500 border-slate-800 hover:border-indigo-400'
                                     }`}
                             >
-                                {/* RSVP Badge Overlay */}
-                                {event.isGuest && (
-                                    <div className="absolute top-4 right-4 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
-                                        <CheckCircle size={14} />
-                                        RSVPed
-                                    </div>
-                                )}
+
 
                                 {/* Header */}
                                 <div className="flex justify-between items-start mb-4">

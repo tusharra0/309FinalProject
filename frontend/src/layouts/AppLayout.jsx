@@ -16,7 +16,9 @@ import {
     Users,
     Tag,
     Shield,
-    UserPlus
+    UserPlus,
+    ChevronDown,
+    ChevronRight
 } from 'lucide-react';
 
 import logo from '../assets/logo-v2.png';
@@ -26,6 +28,14 @@ const AppLayout = () => {
     const { user, fetchUser } = useUserStore();
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [expandedMenus, setExpandedMenus] = useState({});
+
+    const toggleMenu = (label) => {
+        setExpandedMenus(prev => ({
+            ...prev,
+            [label]: !prev[label]
+        }));
+    };
 
     // Fetch user data if token exists but user data is not loaded
     useEffect(() => {
@@ -55,6 +65,14 @@ const AppLayout = () => {
                     { to: '/user/promotions', label: 'Promotions', icon: Tag },
                     { to: '/user/events', label: 'Events', icon: Calendar },
                     { to: '/user/transactions', label: 'Transactions', icon: CreditCard },
+                    {
+                        label: 'Event Organizer',
+                        icon: Calendar,
+                        children: [
+                            { to: '/organizer/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                            { to: '/organizer/events', label: 'Events', icon: Calendar },
+                        ]
+                    }
                 ];
             case 'cashier':
                 return [
@@ -63,15 +81,20 @@ const AppLayout = () => {
                     { to: '/cashier/purchase', label: 'Purchase', icon: CreditCard },
                     { to: '/cashier/redemptions/process', label: 'Process Redemption', icon: Gift },
                     { to: '/cashier/events', label: 'Manage Events', icon: Calendar },
-                    // Regular User Views
-                    { to: '/user/dashboard', label: 'My Dashboard', icon: User },
-                    { to: '/user/my-qr', label: 'My QR', icon: QrCode },
-                    { to: '/user/transfer', label: 'Transfer Points', icon: ArrowRightLeft },
-                    { to: '/user/redeem', label: 'Redeem', icon: Gift },
-                    { to: '/user/redemption-qr', label: 'Redemption QR', icon: QrCode },
-                    { to: '/user/promotions', label: 'Promotions', icon: Tag },
-                    { to: '/user/events', label: 'Events', icon: Calendar },
-                    { to: '/user/transactions', label: 'My Transactions', icon: CreditCard },
+                    {
+                        label: 'My Account',
+                        icon: User,
+                        children: [
+                            { to: '/user/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                            { to: '/user/my-qr', label: 'My QR', icon: QrCode },
+                            { to: '/user/transfer', label: 'Transfer Points', icon: ArrowRightLeft },
+                            { to: '/user/redeem', label: 'Redeem', icon: Gift },
+                            { to: '/user/redemption-qr', label: 'Redemption QR', icon: QrCode },
+                            { to: '/user/promotions', label: 'Promotions', icon: Tag },
+                            { to: '/user/events', label: 'Events', icon: Calendar },
+                            { to: '/user/transactions', label: 'Transactions', icon: CreditCard },
+                        ]
+                    }
                 ];
             case 'manager':
                 return [
@@ -80,6 +103,17 @@ const AppLayout = () => {
                     { to: '/manager/transactions', label: 'Transactions', icon: CreditCard },
                     { to: '/manager/promotions', label: 'Promotions', icon: Tag },
                     { to: '/manager/events', label: 'Events', icon: Calendar },
+                    {
+                        label: 'Cashier Tools',
+                        icon: CreditCard,
+                        children: [
+                            { to: '/cashier/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                            { to: '/cashier/register-customer', label: 'Register Customer', icon: UserPlus },
+                            { to: '/cashier/purchase', label: 'Purchase', icon: CreditCard },
+                            { to: '/cashier/redemptions/process', label: 'Process Redemption', icon: Gift },
+                            { to: '/cashier/events', label: 'Manage Events', icon: Calendar },
+                        ]
+                    }
                 ];
             case 'organizer':
                 return [
@@ -89,7 +123,28 @@ const AppLayout = () => {
             case 'superuser':
                 return [
                     { to: '/superuser/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-                    { to: '/superuser/roles', label: 'Roles', icon: Shield },
+                    {
+                        label: 'Manager Tools',
+                        icon: Shield,
+                        children: [
+                            { to: '/manager/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                            { to: '/manager/users', label: 'Users', icon: Users },
+                            { to: '/manager/transactions', label: 'Transactions', icon: CreditCard },
+                            { to: '/manager/promotions', label: 'Promotions', icon: Tag },
+                            { to: '/manager/events', label: 'Events', icon: Calendar },
+                        ]
+                    },
+                    {
+                        label: 'Cashier Tools',
+                        icon: CreditCard,
+                        children: [
+                            { to: '/cashier/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+                            { to: '/cashier/register-customer', label: 'Register Customer', icon: UserPlus },
+                            { to: '/cashier/purchase', label: 'Purchase', icon: CreditCard },
+                            { to: '/cashier/redemptions/process', label: 'Process Redemption', icon: Gift },
+                            { to: '/cashier/events', label: 'Manage Events', icon: Calendar },
+                        ]
+                    }
                 ];
             default:
                 return [];
@@ -124,15 +179,45 @@ const AppLayout = () => {
                 <div className="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar">
                     <div className="space-y-1">
                         {getNavLinks().map((link) => (
-                            <Link
-                                key={link.to}
-                                to={link.to}
-                                className="flex items-center gap-3 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all duration-200 font-medium group text-sm"
-                                onClick={() => setIsSidebarOpen(false)}
-                            >
-                                <link.icon size={18} className="group-hover:scale-110 transition-transform duration-200" />
-                                <span>{link.label}</span>
-                            </Link>
+                            link.children ? (
+                                <div key={link.label}>
+                                    <button
+                                        onClick={() => toggleMenu(link.label)}
+                                        className="w-full flex items-center justify-between px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all duration-200 font-medium group text-sm"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <link.icon size={18} className="group-hover:scale-110 transition-transform duration-200" />
+                                            <span>{link.label}</span>
+                                        </div>
+                                        {expandedMenus[link.label] ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                                    </button>
+                                    {expandedMenus[link.label] && (
+                                        <div className="pl-4 mt-1 space-y-1">
+                                            {link.children.map((child) => (
+                                                <Link
+                                                    key={child.to}
+                                                    to={child.to}
+                                                    className="flex items-center gap-3 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all duration-200 font-medium group text-sm"
+                                                    onClick={() => setIsSidebarOpen(false)}
+                                                >
+                                                    <child.icon size={18} className="group-hover:scale-110 transition-transform duration-200" />
+                                                    <span>{child.label}</span>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                <Link
+                                    key={link.to}
+                                    to={link.to}
+                                    className="flex items-center gap-3 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all duration-200 font-medium group text-sm"
+                                    onClick={() => setIsSidebarOpen(false)}
+                                >
+                                    <link.icon size={18} className="group-hover:scale-110 transition-transform duration-200" />
+                                    <span>{link.label}</span>
+                                </Link>
+                            )
                         ))}
                     </div>
                 </div>

@@ -39,7 +39,11 @@ const EventDetails = () => {
             setSuccess('Successfully RSVPed to event!');
             fetchEvent(); // Refresh event data
         } catch (err) {
-            setError(err.message || 'Failed to RSVP');
+            let msg = err.message;
+            if (msg === 'Cannot add guest after event end.') {
+                msg = 'Cannot join event after event has ended';
+            }
+            setError(msg || 'Failed to RSVP');
         } finally {
             setActionLoading(false);
         }

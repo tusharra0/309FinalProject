@@ -44,26 +44,26 @@ const SuperuserDashboard = () => {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-2xl font-bold text-slate-900">System Administration</h1>
-                <p className="text-slate-600">Global system overview and configuration.</p>
+                <h1 className="text-3xl font-bold text-white mb-2">System Administration</h1>
+                <p className="text-slate-400">Global system overview and configuration.</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 className="text-sm font-semibold text-slate-500 uppercase">System Status</h3>
-                    <p className="text-3xl font-bold text-emerald-600 mt-2">Operational</p>
+                <div className="bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-800">
+                    <h3 className="text-sm font-semibold text-slate-400 uppercase">System Status</h3>
+                    <p className="text-3xl font-bold text-emerald-400 mt-2">Operational</p>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 className="text-sm font-semibold text-slate-500 uppercase">Total Users</h3>
-                    <p className="text-3xl font-bold text-slate-900 mt-2">{loading ? '...' : formatNumber(stats.totalUsers)}</p>
+                <div className="bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-800">
+                    <h3 className="text-sm font-semibold text-slate-400 uppercase">Total Users</h3>
+                    <p className="text-3xl font-bold text-white mt-2">{loading ? '...' : formatNumber(stats.totalUsers)}</p>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 className="text-sm font-semibold text-slate-500 uppercase">Total Transactions</h3>
-                    <p className="text-3xl font-bold text-slate-900 mt-2">{loading ? '...' : formatNumber(stats.totalTransactions)}</p>
+                <div className="bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-800">
+                    <h3 className="text-sm font-semibold text-slate-400 uppercase">Total Transactions</h3>
+                    <p className="text-3xl font-bold text-white mt-2">{loading ? '...' : formatNumber(stats.totalTransactions)}</p>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                    <h3 className="text-sm font-semibold text-slate-500 uppercase">Points Circulating</h3>
-                    <p className="text-3xl font-bold text-indigo-600 mt-2">{loading ? '...' : formatNumber(stats.pointsIssued - stats.pointsRedeemed)}</p>
+                <div className="bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-800">
+                    <h3 className="text-sm font-semibold text-slate-400 uppercase">Points Circulating</h3>
+                    <p className="text-3xl font-bold text-indigo-400 mt-2">{loading ? '...' : formatNumber(stats.pointsIssued - stats.pointsRedeemed)}</p>
                 </div>
             </div>
         </div>

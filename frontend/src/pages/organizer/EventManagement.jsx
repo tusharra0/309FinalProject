@@ -43,7 +43,14 @@ const EventManagement = ({ basePath = '/organizer' }) => {
             setNewGuestId('');
             fetchEvent(false);
         } catch (err) {
-            setError(err.message || 'Failed to add guest');
+            console.error('Add guest error:', err);
+            if (err.status === 403) {
+                setError('Only managers can add users to events');
+            } else if (err.message === 'Cannot add guest after event end.') {
+                setError('Cannot join event after event has ended');
+            } else {
+                setError(err.message || 'Failed to add guest');
+            }
         }
     };
 

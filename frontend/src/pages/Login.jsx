@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import { Eye, EyeOff } from 'lucide-react';
+
 import { Link, useNavigate } from 'react-router-dom';
 import GoogleAuthButton from '../components/GoogleAuthButton';
 import { loginWithGoogle, loginWithPassword } from '../api/auth';
@@ -15,17 +16,7 @@ const initialState = {
   password: ''
 };
 
-// Helper to create a dummy JWT for dev/testing
-const createMockJwt = (role, userId = '123') => {
-  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const payload = btoa(JSON.stringify({
-    role,
-    userId,
-    exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour expiry
-  }));
-  const signature = 'dummy_signature';
-  return `${header}.${payload}.${signature}`;
-};
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -35,6 +26,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const canSubmit = useMemo(() => form.utorid.trim() && form.password.trim(), [form]);
 
@@ -105,26 +97,7 @@ const Login = () => {
     }
   };
 
-  const handleMockLogin = (role) => {
-    const token = createMockJwt(role);
-    const decoded = jwtDecode(token);
 
-    // Create mock user object
-    const mockUser = {
-      id: parseInt(decoded.userId),
-      utorid: `mock_${role}`,
-      role: decoded.role,
-      email: `${role}@example.com`,
-      firstName: 'Mock',
-      lastName: role.charAt(0).toUpperCase() + role.slice(1),
-      points: 1000,
-      verified: true
-    };
-
-    setUser(mockUser, token);
-    const target = redirectPathForRole(role);
-    navigate(target, { replace: true });
-  };
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-12">
@@ -149,14 +122,23 @@ const Login = () => {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              autoComplete="current-password"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                className="w-full rounded-lg bg-slate-900 border border-slate-700 px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
           <div className="flex justify-end">
             <Link
@@ -199,27 +181,7 @@ const Login = () => {
           </Link>
         </p>
 
-        {/* Dev Login Section */}
-        <div className="pt-6 border-t border-slate-800">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 text-center">Dev / Mock Login</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => handleMockLogin('regular')} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded transition-colors">
-              User
-            </button>
-            <button onClick={() => handleMockLogin('cashier')} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded transition-colors">
-              Cashier
-            </button>
-            <button onClick={() => handleMockLogin('manager')} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded transition-colors">
-              Manager
-            </button>
-            <button onClick={() => handleMockLogin('organizer')} className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded transition-colors">
-              Organizer
-            </button>
-            <button onClick={() => handleMockLogin('superuser')} className="col-span-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded transition-colors">
-              Superuser
-            </button>
-          </div>
-        </div>
+
       </div>
     </div>
   );

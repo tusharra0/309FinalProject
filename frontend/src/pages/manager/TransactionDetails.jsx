@@ -121,9 +121,15 @@ const TransactionDetails = () => {
                                 <span className={`px-4 py-2 rounded-full text-sm font-semibold border capitalize ${getTypeBadge(transaction.type)}`}>
                                     {transaction.type}
                                 </span>
-                                <p className={`text-3xl font-bold ${transaction.pointChange > 0 ? 'text-emerald-400' : 'text-slate-300'}`}>
-                                    {transaction.pointChange > 0 ? '+' : ''}{transaction.pointChange} pts
-                                </p>
+                                {(() => {
+                                    const val = transaction.amount ?? transaction.sent ?? transaction.awarded ?? transaction.pointChange ?? 0;
+                                    const positive = Number(val) > 0;
+                                    return (
+                                        <p className={`text-3xl font-bold ${positive ? 'text-emerald-400' : 'text-slate-300'}`}>
+                                            {positive ? '+' : ''}{val} pts
+                                        </p>
+                                    );
+                                })()}
                             </div>
 
                             <p className="text-slate-300 text-lg">{transaction.description}</p>

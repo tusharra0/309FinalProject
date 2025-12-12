@@ -226,6 +226,7 @@ exports.getUserById = async (req, res) => {
         points: true,
         createdAt: true,
         verified: true,
+        activated: true,
         avatarUrl: true
       }
     });
@@ -261,7 +262,7 @@ exports.updateUserById = async (req, res) => {
 
     const requesterRole = req.user?.role;
 
-    const allowedFields = ['email', 'verified', 'suspicious', 'role'];
+    const allowedFields = ['email', 'verified', 'activated', 'suspicious', 'role'];
     const receivedFields = Object.keys(updates);
     const unknownFields = receivedFields.filter((field) => !allowedFields.includes(field));
 
@@ -301,6 +302,16 @@ exports.updateUserById = async (req, res) => {
         return res.status(400).json({ message: 'Invalid suspicious flag.' });
       }
       sanitizedUpdates.suspicious = updates.suspicious;
+    }
+
+    if (
+      Object.prototype.hasOwnProperty.call(updates, 'activated') &&
+      updates.activated !== null
+    ) {
+      if (typeof updates.activated !== 'boolean') {
+        return res.status(400).json({ message: 'Invalid activated flag.' });
+      }
+      sanitizedUpdates.activated = updates.activated;
     }
 
     if (Object.prototype.hasOwnProperty.call(updates, 'role') && updates.role !== null) {
@@ -355,23 +366,24 @@ exports.updateUserById = async (req, res) => {
 
     // Check if trying to promote a suspicious user to cashier
     const resultingSuspicious =
-    sanitizedUpdates.suspicious !== undefined
-      ? sanitizedUpdates.suspicious
-      : existingUser.suspicious;
-  const resultingRole = sanitizedUpdates.role ?? existingUser.role;
+      sanitizedUpdates.suspicious !== undefined
+        ? sanitizedUpdates.suspicious
+        : existingUser.suspicious;
+    const resultingRole = sanitizedUpdates.role ?? existingUser.role;
 
-  const isPromotingToCashier =
-    existingUser.role !== 'cashier' && resultingRole === 'cashier';
+    const isPromotingToCashier =
+      existingUser.role !== 'cashier' && resultingRole === 'cashier';
 
-  if (isPromotingToCashier && resultingSuspicious) {
-    return res.status(400).json({
-      message: 'Suspicious users cannot be promoted to cashier.'
-    });
-  }
+    if (isPromotingToCashier && resultingSuspicious) {
+      return res.status(400).json({
+        message: 'Suspicious users cannot be promoted to cashier.'
+      });
+    }
 
     const updateData = {};
     if (sanitizedUpdates.email !== undefined) updateData.email = sanitizedUpdates.email;
     if (sanitizedUpdates.verified !== undefined) updateData.verified = sanitizedUpdates.verified;
+    if (sanitizedUpdates.activated !== undefined) updateData.activated = sanitizedUpdates.activated;
     if (sanitizedUpdates.suspicious !== undefined) updateData.suspicious = sanitizedUpdates.suspicious;
     if (sanitizedUpdates.role !== undefined) updateData.role = sanitizedUpdates.role;
 
@@ -385,6 +397,7 @@ exports.updateUserById = async (req, res) => {
         name: true,
         email: true,
         verified: true,
+        activated: true,
         suspicious: true,
         role: true
       }
@@ -392,24 +405,27 @@ exports.updateUserById = async (req, res) => {
 
     // Return only the updated fields plus id, utorid, name
     const response = {
-    id: updatedUser.id,
-    utorid: updatedUser.utorid,
-    name: updatedUser.name
-  };
+      id: updatedUser.id,
+      utorid: updatedUser.utorid,
+      name: updatedUser.name
+    };
 
-  // Add only the fields that were actually updated
-  if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'email')) {
-    response.email = updatedUser.email;
-  }
-  if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'verified')) {
-    response.verified = updatedUser.verified;
-  }
-  if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'suspicious')) {
-    response.suspicious = updatedUser.suspicious;
-  }
-  if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'role')) {
-    response.role = updatedUser.role;
-  }
+    // Add only the fields that were actually updated
+    if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'email')) {
+      response.email = updatedUser.email;
+    }
+    if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'verified')) {
+      response.verified = updatedUser.verified;
+    }
+    if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'suspicious')) {
+      response.suspicious = updatedUser.suspicious;
+    }
+    if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'role')) {
+      response.role = updatedUser.role;
+    }
+    if (Object.prototype.hasOwnProperty.call(sanitizedUpdates, 'activated')) {
+      response.activated = updatedUser.activated;
+    }
 
     return res.status(200).json(response);
 
@@ -532,40 +548,40 @@ exports.updateMyInfo = async (req, res) => {
     }
 
     if (Object.prototype.hasOwnProperty.call(updates, 'birthday') && updates.birthday !== null) {
-    const birthday = updates.birthday;
+      const birthday = updates.birthday;
 
-    // Must be a string in strict YYYY-MM-DD
-    if (typeof birthday !== 'string') {
-      return res.status(400).json({ message: 'Invalid birthday' });
+      // Must be a string in strict YYYY-MM-DD
+      if (typeof birthday !== 'string') {
+        return res.status(400).json({ message: 'Invalid birthday' });
+      }
+
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthday);
+      if (!match) {
+        return res.status(400).json({ message: 'Invalid birthday' });
+      }
+
+      const year = Number(match[1]);
+      const month = Number(match[2]); // 1-12
+      const day = Number(match[3]);   // 1-31
+
+      const date = new Date(birthday + 'T00:00:00.000Z');
+
+      if (
+        Number.isNaN(date.getTime()) ||
+        date.getUTCFullYear() !== year ||
+        date.getUTCMonth() + 1 !== month ||
+        date.getUTCDate() !== day
+      ) {
+        return res.status(400).json({ message: 'Invalid birthday' });
+      }
+
+      const today = new Date();
+      if (date > today) {
+        return res.status(400).json({ message: 'Invalid birthday' });
+      }
+
+      updateData.birthday = date;
     }
-
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(birthday);
-    if (!match) {
-      return res.status(400).json({ message: 'Invalid birthday' });
-    }
-
-    const year = Number(match[1]);
-    const month = Number(match[2]); // 1-12
-    const day = Number(match[3]);   // 1-31
-
-    const date = new Date(birthday + 'T00:00:00.000Z');
-
-    if (
-      Number.isNaN(date.getTime()) ||
-      date.getUTCFullYear() !== year ||
-      date.getUTCMonth() + 1 !== month ||
-      date.getUTCDate() !== day
-    ) {
-      return res.status(400).json({ message: 'Invalid birthday' });
-    }
-
-    const today = new Date();
-    if (date > today) {
-      return res.status(400).json({ message: 'Invalid birthday' });
-    }
-
-  updateData.birthday = date;
-}
 
     const hasRealUpdates = Object.keys(updateData).length > 0;
     if (!hasRealUpdates && !hasAvatar) {

@@ -32,7 +32,7 @@ const UserDetails = () => {
             setForm({
                 role: data.role,
                 verified: data.verified,
-                active: data.active
+                active: data.activated
             });
         } catch (err) {
             setError(err.message || 'Failed to load user');
@@ -48,7 +48,8 @@ const UserDetails = () => {
 
         try {
             setSaving(true);
-            await updateUserById(userId, form);
+            const { active, ...rest } = form;
+            await updateUserById(userId, { ...rest, activated: active });
             setSuccess('User updated successfully!');
             fetchUser();
         } catch (err) {
@@ -105,7 +106,7 @@ const UserDetails = () => {
                         </div>
                         <div>
                             <p className="text-slate-500 text-xs mb-1">Name</p>
-                            <p className="text-white font-medium">{user.firstName} {user.lastName}</p>
+                            <p className="text-white font-medium">{user.name}</p>
                         </div>
                         <div>
                             <p className="text-slate-500 text-xs mb-1">Email</p>
@@ -138,7 +139,7 @@ const UserDetails = () => {
                             <option value="regular">Regular User</option>
                             <option value="cashier">Cashier</option>
                             <option value="manager">Manager</option>
-                            <option value="organizer">Event Organizer</option>
+
                             <option value="superuser">Superuser</option>
                         </select>
                     </div>
