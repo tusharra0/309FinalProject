@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client');
+const emailService = require('./emailService');
 
 const prisma = new PrismaClient();
 
@@ -709,6 +710,15 @@ const addGuest = async ({ eventId, utorid, user }) => {
     guestAdded: mapPerson(lastGuest ? lastGuest.user : person),
     numGuests: updatedGuests.length
   };
+
+  // Send calendar invite
+  if (person.email) {
+    emailService.sendEventInvite(person.email, refreshed).catch(err => {
+      console.error('Background email send failed:', err);
+    });
+  }
+
+  return result;
 };
 
 const addGuestSelf = async ({ eventId, user }) => {
@@ -743,6 +753,17 @@ const addGuestSelf = async ({ eventId, user }) => {
     guestAdded: mapPerson(person),
     numGuests: (refreshed.guests || []).length
   };
+
+  // Send calendar invite
+  if (person.email) {
+    // We need the full event object with dates for the ICS
+    // 'refreshed' has the updated data, ensuring we use valid times
+    emailService.sendEventInvite(person.email, refreshed).catch(err => {
+      console.error('Background email send failed:', err);
+    });
+  }
+
+  return result;
 };
 
 const removeGuest = async ({ eventId, userId, user }) => {

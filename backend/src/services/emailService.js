@@ -4,6 +4,12 @@ const apiKey = process.env.RESEND_API_KEY;
 const resend = apiKey ? new Resend(apiKey) : null;
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
 
+if (apiKey) {
+  console.log('✅ Email Service: RESEND_API_KEY loaded. Email sending enabled.');
+} else {
+  console.warn('⚠️ Email Service: RESEND_API_KEY missing. Emails will NOT be sent.');
+}
+
 const sendWelcomeEmail = async (email) => {
   if (!email) return;
   if (!resend) {
@@ -199,8 +205,43 @@ const sendPasswordResetEmail = async (email, resetToken, name) => {
   }
 };
 
+const sendEventInvite = async (email, event) => {
+  if (!email || !event) return;
+  if (!resend) {
+    console.warn('RESEND_API_KEY not configured; event invite email skipped.');
+    return;
+  }
+
+  const icsContent = generateICS(event);
+  const icsFilename = 'invite.ics';
+
+  try {
+    await resend.emails.send({
+      from: 'Campus Loyalty <noreply@insurieai.com>',
+      to: email,
+      subject: `Calendar Invite: ${event.name}`,
+      html: `
+        <p>You have successfully registered for <strong>${event.name}</strong>.</p>
+        <p><strong>Time:</strong> ${new Date(event.startTime).toLocaleString()} - ${new Date(event.endTime).toLocaleString()}</p>
+        <p><strong>Location:</strong> ${event.location}</p>
+        <p>Please find the calendar invite attached.</p>
+      `,
+      attachments: [
+        {
+          filename: icsFilename,
+          content: icsContent,
+        }
+      ]
+    });
+    console.log(`Event invite sent to ${email}`);
+  } catch (err) {
+    console.error('Failed to send event invite:', err);
+  }
+};
+
 module.exports = {
   sendWelcomeEmail,
   sendVerificationEmail,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendEventInvite
 };
