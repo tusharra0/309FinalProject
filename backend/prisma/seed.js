@@ -16,7 +16,7 @@ async function main() {
     await prisma.promotion.deleteMany();
     await prisma.user.deleteMany();
 
-    console.log('✅ Cleared existing data');
+    console.log('Cleared existing data');
 
     // Hash password for all users
     const hashedPassword = await bcrypt.hash('Password123!', 10);

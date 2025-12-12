@@ -1,0 +1,83 @@
+This document details how AI tools (specifically Cursor and Antigravity AI) were used in the development 
+of this project, primarily for scaffolding and ensuring responsive design.
+
+SCAFFOLDING
+-----------
+
+1. Project Structure Setup
+   - AI was used to scaffold the initial project structure, including:
+     * Frontend folder organization (pages, components, routes, context, api, styles)
+     * Separation of concerns following MVC-like patterns
+
+2. Frontend Scaffolding
+     * Auth pages (Login, Signup, PasswordReset, VerifyEmail)
+   
+   - Reusable Components: AI scaffolded common components:
+     * Navbar.jsx - Navigation component
+     * LoadingSpinner.jsx - Loading states
+     * ErrorMessage.jsx - Error display
+     * SuccessMessage.jsx - Success notifications
+     * Pagination.jsx - Pagination controls
+     * FeatureCard.jsx - Feature display cards
+     * BlobBackground.jsx - Decorative background
+   
+   - Routing Structure: AI set up React Router configuration with:
+     * ProtectedRoute.jsx - Route protection
+     * RoleRedirect.jsx - Role-based redirects
+     * AppLayout.jsx - Layout wrapper
+
+3. Database Schema
+   - AI assisted in designing the Prisma schema with:
+     * Junction tables for many-to-many relationships
+     * Converting our schema to Postgres
+   
+   - Seed Data: AI generated comprehensive seed data including:
+     * Multiple user accounts with different roles
+     * Sample promotions
+     * Sample events
+     * Various transaction types (purchase, transfer, redemption, event, adjustment)
+
+RESPONSIVENESS
+--------------
+
+1. Tailwind CSS Configuration
+   - AI configured Tailwind CSS for responsive design:
+     * Set up tailwind.config.js with custom theme
+     * Configured PostCSS for processing
+     * Added responsive breakpoints and utilities
+
+2. Responsive Component Design
+   - AI ensured all components use Tailwind's responsive utilities:
+     * Mobile-first approach with sm:, md:, lg:, xl: breakpoints
+     * Responsive grid layouts for dashboards
+     * Responsive navigation (mobile menu, desktop navbar)
+     * Responsive forms and input fields
+     * Responsive tables and data displays
+     * Responsive cards and containers
+
+3. Layout Responsiveness
+   - AI implemented responsive layouts:
+     * AppLayout.jsx with responsive sidebar/navigation
+     * Dashboard layouts that adapt to screen size
+     * Responsive modals and dialogs
+     * Mobile-friendly forms and buttons
+
+4. UI/UX Responsiveness
+   - AI helped create responsive UI patterns:
+     * Touch-friendly button sizes on mobile
+     * Responsive typography scaling
+     * Responsive spacing and padding
+     * Responsive image and QR code displays
+     * Responsive data tables with horizontal scroll on mobile
+
+GENERAL AI ASSISTANCE
+---------------------
+
+- Code generation for modifying Express.js routes and controllers
+- React component structure and hooks usage
+- Error handling patterns
+- Authentication and authorization logic
+- Database query optimization suggestions
+- State management setup (Zustand store)
+- Context API setup for authentication
+
