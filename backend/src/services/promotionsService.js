@@ -199,7 +199,7 @@ const listPromotions = async ({ user, query }) => {
   // Build orderBy object from query parameters
   const orderByField = query.orderBy || 'id';
   const orderByValue = query.order === 'asc' ? 'asc' : 'desc';
-  
+
   const orderBy = {};
   if (['id', 'name', 'startTime', 'createdAt', 'points'].includes(orderByField)) {
     orderBy[orderByField] = orderByValue;
