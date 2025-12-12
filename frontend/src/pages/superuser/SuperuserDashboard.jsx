@@ -1,4 +1,5 @@
 import React from 'react';
+import { get } from '../../api/api';
 
 const SuperuserDashboard = () => {
     const [stats, setStats] = React.useState({
@@ -12,19 +13,8 @@ const SuperuserDashboard = () => {
     React.useEffect(() => {
         const fetchStats = async () => {
             try {
-                const token = localStorage.getItem('authToken');
-                const response = await fetch('http://localhost:3000/manager/stats', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setStats(data);
-                } else {
-                    console.error('Failed to fetch stats');
-                }
+                const data = await get('/manager/stats');
+                setStats(data);
             } catch (error) {
                 console.error('Error fetching dashboard stats:', error);
             } finally {

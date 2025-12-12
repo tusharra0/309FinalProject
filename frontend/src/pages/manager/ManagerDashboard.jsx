@@ -1,4 +1,5 @@
 import React from 'react';
+import { get } from '../../api/api';
 
 const ManagerDashboard = () => {
     const [stats, setStats] = React.useState({
@@ -12,20 +13,8 @@ const ManagerDashboard = () => {
     React.useEffect(() => {
         const fetchStats = async () => {
             try {
-                // Assuming you have an axios instance configured with auth headers or use fetch with token
-                const token = localStorage.getItem('authToken'); // Simplistic auth handling
-                const response = await fetch('http://localhost:3000/manager/stats', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setStats(data);
-                } else {
-                    console.error('Failed to fetch stats');
-                }
+                const data = await get('/manager/stats');
+                setStats(data);
             } catch (error) {
                 console.error('Error fetching dashboard stats:', error);
             } finally {
