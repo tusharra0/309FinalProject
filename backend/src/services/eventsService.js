@@ -703,14 +703,6 @@ const addGuest = async ({ eventId, utorid, user }) => {
   const updatedGuests = refreshed.guests || [];
   const lastGuest = updatedGuests.find((g) => g.userId === person.id);
 
-  return {
-    id: refreshed.id,
-    name: refreshed.name,
-    location: refreshed.location,
-    guestAdded: mapPerson(lastGuest ? lastGuest.user : person),
-    numGuests: updatedGuests.length
-  };
-
   // Send calendar invite
   if (person.email) {
     emailService.sendEventInvite(person.email, refreshed).catch(err => {
@@ -718,7 +710,13 @@ const addGuest = async ({ eventId, utorid, user }) => {
     });
   }
 
-  return result;
+  return {
+    id: refreshed.id,
+    name: refreshed.name,
+    location: refreshed.location,
+    guestAdded: mapPerson(lastGuest ? lastGuest.user : person),
+    numGuests: updatedGuests.length
+  };
 };
 
 const addGuestSelf = async ({ eventId, user }) => {
@@ -746,14 +744,6 @@ const addGuestSelf = async ({ eventId, user }) => {
   await incrementGuests(event.id, person.id);
   const refreshed = await fetchEvent(event.id);
 
-  return {
-    id: refreshed.id,
-    name: refreshed.name,
-    location: refreshed.location,
-    guestAdded: mapPerson(person),
-    numGuests: (refreshed.guests || []).length
-  };
-
   // Send calendar invite
   if (person.email) {
     // We need the full event object with dates for the ICS
@@ -763,7 +753,13 @@ const addGuestSelf = async ({ eventId, user }) => {
     });
   }
 
-  return result;
+  return {
+    id: refreshed.id,
+    name: refreshed.name,
+    location: refreshed.location,
+    guestAdded: mapPerson(person),
+    numGuests: (refreshed.guests || []).length
+  };
 };
 
 const removeGuest = async ({ eventId, userId, user }) => {
