@@ -1,7 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
 const emailService = require('./emailService');
-
-const prisma = new PrismaClient();
+const prisma = require('../utils/prisma');
 
 const createError = (status, message) => {
   const error = new Error(message);

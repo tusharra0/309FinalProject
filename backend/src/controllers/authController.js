@@ -1,12 +1,10 @@
-const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { sendWelcomeEmail, sendVerificationEmail, sendPasswordResetEmail } = require('../services/emailService');
 const { verifyGoogleIdToken } = require('../services/googleAuthService');
 const { signAppJwt } = require('../utils/jwt');
-
-const prisma = new PrismaClient();
+const prisma = require('../utils/prisma');
 const RESET_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const VERIFICATION_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 

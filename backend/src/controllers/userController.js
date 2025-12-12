@@ -1,7 +1,5 @@
 const { createUser: createUserService, fetchUsers: fetchUsersService } = require('../services/userService');
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const prisma = require('../utils/prisma');
 
 const toDateOnlyString = (value) => {
   if (!value) return null;

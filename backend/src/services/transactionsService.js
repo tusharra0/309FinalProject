@@ -1,7 +1,6 @@
-const { PrismaClient, TransactionType } = require('@prisma/client');
+const { TransactionType } = require('@prisma/client');
 const { calculateBasePoints, calculatePromotionBonuses } = require('./pointsService');
-
-const prisma = new PrismaClient();
+const prisma = require('../utils/prisma');
 
 const createError = (status, message) => {
   const error = new Error(message);

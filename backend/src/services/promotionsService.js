@@ -1,6 +1,5 @@
-const { PrismaClient, PromotionType } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const { PromotionType } = require('@prisma/client');
+const prisma = require('../utils/prisma');
 
 const createError = (status, message) => {
   const error = new Error(message);
