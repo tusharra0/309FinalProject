@@ -205,6 +205,32 @@ const sendPasswordResetEmail = async (email, resetToken, name) => {
   }
 };
 
+const formatICSDate = (date) => {
+  if (!date) return '';
+  return new Date(date).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+};
+
+const generateICS = (event) => {
+  const uid = `${event.id || Date.now()}@campusloyalty.com`;
+  const dtStamp = formatICSDate(new Date());
+  const dtStart = formatICSDate(event.startTime);
+  const dtEnd = formatICSDate(event.endTime);
+
+  return `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Campus Loyalty//NONSGML Event//EN
+BEGIN:VEVENT
+UID:${uid}
+DTSTAMP:${dtStamp}
+DTSTART:${dtStart}
+DTEND:${dtEnd}
+SUMMARY:${event.name}
+DESCRIPTION:${(event.description || '').replace(/\n/g, '\\n')}
+LOCATION:${event.location || ''}
+END:VEVENT
+END:VCALENDAR`.replace(/\n/g, '\r\n');
+};
+
 const sendEventInvite = async (email, event) => {
   if (!email || !event) return;
   if (!resend) {
