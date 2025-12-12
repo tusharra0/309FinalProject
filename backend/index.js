@@ -1,28 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-const port = (() => {
-    // For Vercel serverless, use environment PORT or default
-    if (process.env.VERCEL) {
-        return process.env.PORT || 3000;
-    }
-
-    // For local development, require port argument
-    const args = process.argv;
-
-    if (args.length !== 3) {
-        console.error("usage: node index.js port");
-        process.exit(1);
-    }
-
-    const num = parseInt(args[2], 10);
-    if (isNaN(num)) {
-        console.error("error: argument must be an integer.");
-        process.exit(1);
-    }
-
-    return num;
-})();
+const port = 3000;
 
 const express = require("express");
 const cors = require("cors");
@@ -80,17 +59,11 @@ try {
     process.exit(1);
 }
 
-// Only start server in local development, not on Vercel
-if (!process.env.VERCEL) {
-    const server = app.listen(port, '0.0.0.0', () => {
-        console.log(`Server running on port ${port}`);
-    });
+const server = app.listen(port, '0.0.0.0', () => {
+    console.log(`Server running on port ${port}`);
+});
 
-    server.on('error', (err) => {
-        console.error(`cannot start server: ${err.message}`);
-        process.exit(1);
-    });
-}
-
-// Export for Vercel serverless
-module.exports = app;
+server.on('error', (err) => {
+    console.error(`cannot start server: ${err.message}`);
+    process.exit(1);
+});
